@@ -1,0 +1,49 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: capture-service
+
+  # Tell Spring Cloud Stream which function beans to bind automatically
+  function:
+    definition: webhookEventSupplier
+
+  cloud:
+    stream:
+      bindings:
+        # Convention: {supplierBeanName}-out-0
+        webhookEventSupplier-out-0:
+          destination: webhook-events        # Kafka topic
+          content-type: application/json     # Binder uses Jackson ? no serializer config needed
+
+      kafka:
+        binder:
+          brokers: localhost:9092
+          auto-create-topics: true
+          replication-factor: 1
+
+        bindings:
+          webhookEventSupplier-out-0:
+            producer:
+              sync: false
+              configuration:
+                acks: all
+                retries: 3
+                enable.idempotence: true
+                linger.ms: 5
+                batch.size: 16384
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    dev.webhookdebugger: DEBUG
+    org.springframework.cloud.stream: INFO

@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: common
+  port: 8080
+
+  kafka:
+    bootstrap-servers: http://localhost:9092

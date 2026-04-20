@@ -2,6 +2,13 @@ server:
   port: 8082
 
 spring:
+  main:
+    web-application-type: servlet
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.web.reactive.ReactiveWebServerFactoryAutoConfiguration
+      - org.springframework.boot.autoconfigure.reactor.ReactorAutoConfiguration
+
   application:
     name: ui-service
 
@@ -22,6 +29,11 @@ spring:
   vaadin:
     launch-browser: false
     whitelisted-packages: com.vaadin,org.vaadin,dev.webhookdebugger.ui
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 jwt:
   secret: "change-this-to-a-256-bit-secret-before-deploying-to-production"

@@ -13,4 +13,6 @@ public interface EndpointRepository extends JpaRepository<Endpoint, UUID> {
 
     Optional<Endpoint> findBySlug(String slug);
     List<Endpoint> findAllByOrderByCreatedAtDesc();
+    List<Endpoint> findByUserIdOrderByCreatedAtDesc(UUID userId);
+    long countByUserId(UUID userId);
 }

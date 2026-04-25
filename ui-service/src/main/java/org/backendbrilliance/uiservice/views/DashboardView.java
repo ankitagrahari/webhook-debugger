@@ -23,6 +23,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.*;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
+import org.backendbrilliance.common.enums.Tier;
 import org.backendbrilliance.uiservice.entity.Endpoint;
 import org.backendbrilliance.uiservice.entity.WebhookRequest;
 import org.backendbrilliance.uiservice.service.EndpointService;
@@ -54,6 +55,7 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
     private Grid<WebhookRequest> requestGrid;
     private VerticalLayout detailPanel;
     private Span liveIndicator;
+    private Tier currentTier = Tier.FREE;
 
     private final ScheduledExecutorService scheduler =
             Executors.newSingleThreadScheduledExecutor();
@@ -82,6 +84,7 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
                     "The endpoint \"" + slug + "\" doesn't exist.", VaadinIcon.WARNING));
             return;
         }
+        currentTier = endpointService.getTierForUser(currentEndpoint.getUserId());
         add(buildUrlBar());
         addAndExpand(buildMainContent());
     }
@@ -121,7 +124,17 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
         liveIndicator.getStyle().set("font-size", "10px").set("font-weight", "700")
                 .set("letter-spacing", "0.8px").set("color", "#16a34a").set("white-space", "nowrap");
 
-        HorizontalLayout bar = new HorizontalLayout(nameSpan, urlDisplay, copyBtn, liveIndicator);
+        // Tier badge
+        Span tierBadge = new Span(currentTier.name());
+        tierBadge.getStyle()
+                .set("font-size", "10px").set("font-weight", "700")
+                .set("padding", "2px 7px").set("border-radius", "4px")
+                .set("letter-spacing", "0.5px")
+                .set("background", currentTier == Tier.FREE ? "#f3f4f6" : "#ede9fe")
+                .set("color", currentTier == Tier.FREE ? "#6b7280" : "#7c3aed")
+                .set("border", "1px solid " + (currentTier == Tier.FREE ? "#e5e7eb" : "#ddd6fe"));
+
+        HorizontalLayout bar = new HorizontalLayout(nameSpan, urlDisplay, copyBtn, tierBadge, liveIndicator);
         bar.setWidthFull();
         bar.setAlignItems(FlexComponent.Alignment.CENTER);
         bar.getStyle().set("padding", "10px 20px").set("background", "#ffffff")
@@ -215,6 +228,11 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
         Button replayBtn = new Button("Replay", new Icon(VaadinIcon.REFRESH));
         replayBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
         replayBtn.addClickListener(e -> openReplayDialog(req));
+
+        boolean canReplay = currentTier != Tier.FREE;
+        replayBtn.setEnabled(canReplay);
+        if (!canReplay) replayBtn.getElement().setAttribute("title",
+                "Upgrade to PRO to replay requests");
 
         Button curlBtn = new Button("cURL", new Icon(VaadinIcon.CODE));
         curlBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
@@ -449,7 +467,7 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
 
     private void refreshGrid() {
         if (currentEndpoint == null || requestGrid == null) return;
-        requestGrid.setItems(requestService.getLatestRequests(currentEndpoint.getId()));
+        requestGrid.setItems(requestService.getLatestRequests(currentEndpoint.getId(), currentTier));
     }
 
     @Override
@@ -460,8 +478,7 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
         pollingTask = scheduler.scheduleAtFixedRate(() -> {
             if (currentEndpoint == null || requestGrid == null) return;
             try {
-                List<WebhookRequest> fresh =
-                        requestService.getLatestRequests(currentEndpoint.getId());
+                List<WebhookRequest> fresh = requestService.getLatestRequests(currentEndpoint.getId(), currentTier);
                 ui.access(() -> requestGrid.setItems(fresh));
             } catch (Exception e) {
                 log.warn("Polling error: {}", e.getMessage());

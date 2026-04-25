@@ -19,6 +19,7 @@ import com.vaadin.flow.router.RouteParameters;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
 import org.backendbrilliance.uiservice.entity.Endpoint;
+import org.backendbrilliance.uiservice.exception.TierLimitException;
 import org.backendbrilliance.uiservice.service.EndpointService;
 import org.backendbrilliance.uiservice.service.WebhookRequestService;
 
@@ -218,7 +219,14 @@ public class MainLayout extends AppLayout {
         dialog.add(content);
 
         Button create = new Button("Create endpoint", e -> {
-            Endpoint created = endpointService.createEndpoint(labelField.getValue());
+            Endpoint created;
+            try {
+                created = endpointService.createEndpoint(labelField.getValue());
+            } catch (TierLimitException ex) {
+                Notification n2 = Notification.show(ex.getMessage(), 4000, Notification.Position.MIDDLE);
+                n2.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                return;
+            }
             dialog.close();
             refreshEndpointList();
             Notification n = Notification.show(

@@ -1,5 +1,6 @@
 package org.backendbrilliance.uiservice.views;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
@@ -14,16 +15,25 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.router.RouteParameters;
+import com.vaadin.flow.theme.lumo.Lumo;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
+import org.backendbrilliance.common.enums.Tier;
 import org.backendbrilliance.uiservice.entity.Endpoint;
+import org.backendbrilliance.uiservice.entity.User;
 import org.backendbrilliance.uiservice.exception.TierLimitException;
 import org.backendbrilliance.uiservice.service.EndpointService;
 import org.backendbrilliance.uiservice.service.WebhookRequestService;
+import org.backendbrilliance.uiservice.service.security.AuthenticatedUser;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 @PermitAll
@@ -32,11 +42,15 @@ public class MainLayout extends AppLayout {
     private final EndpointService endpointService;
     private final WebhookRequestService requestService;
     private VerticalLayout endpointListContainer;
+    private final AuthenticatedUser authenticatedUser;
+    private final AtomicBoolean darkMode = new AtomicBoolean(false);
 
     public MainLayout(EndpointService endpointService,
-                      WebhookRequestService requestService) {
+                      WebhookRequestService requestService,
+                      AuthenticatedUser authenticatedUser) {
         this.endpointService = endpointService;
         this.requestService = requestService;
+        this.authenticatedUser = authenticatedUser;
         setPrimarySection(Section.DRAWER);
         addToNavbar(buildNavbar());
         addToDrawer(buildDrawer());
@@ -45,11 +59,11 @@ public class MainLayout extends AppLayout {
     private HorizontalLayout buildNavbar() {
         DrawerToggle toggle = new DrawerToggle();
 
-        // Brand
         Span appName = new Span("HookSpy");
         appName.getStyle()
                 .set("font-weight", "700").set("font-size", "17px")
-                .set("color", "#111827").set("letter-spacing", "-0.3px");
+                .set("color", "var(--lumo-header-text-color, #111827)")
+                .set("letter-spacing", "-0.3px");
 
         Span badge = new Span("BETA");
         badge.getStyle()
@@ -63,10 +77,33 @@ public class MainLayout extends AppLayout {
         brand.setSpacing(false);
         brand.getStyle().set("gap", "8px");
 
-        // Right
-        Anchor docs = new Anchor("#", "Docs");
-        docs.getStyle().set("font-size", "13px").set("color", "#6b7280")
-                .set("text-decoration", "none").set("font-weight", "500");
+        // Refresh — just refreshes sidebar list, no full reload
+        Button refreshBtn = new Button(new Icon(VaadinIcon.REFRESH));
+        refreshBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
+        refreshBtn.getElement().setAttribute("title", "Refresh endpoints");
+        refreshBtn.getStyle().set("color", "var(--lumo-secondary-text-color, #6b7280)");
+        refreshBtn.addClickListener(e -> refreshEndpointList());
+
+        // Dark / light toggle
+        Button themeBtn = new Button(new Icon(VaadinIcon.MOON));
+        themeBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
+        themeBtn.getElement().setAttribute("title", "Toggle dark mode");
+        themeBtn.getStyle().set("color", "var(--lumo-secondary-text-color, #6b7280)");
+        themeBtn.addClickListener(e -> {
+            boolean isDark = darkMode.get();
+            darkMode.set(!isDark);
+            themeBtn.setIcon(!isDark
+                    ? new Icon(VaadinIcon.SUN_O)
+                    : new Icon(VaadinIcon.MOON));
+            UI.getCurrent().getPage().executeJs(
+                    "document.querySelector('html').setAttribute('theme', $0);",
+                    !isDark ? "dark" : "light");
+        });
+
+        // Avatar + logout
+        String userInitial = authenticatedUser.get()
+                .map(u -> u.getEmail().substring(0, 1).toUpperCase())
+                .orElse("?");
 
         Div avatar = new Div();
         avatar.getStyle()
@@ -76,11 +113,13 @@ public class MainLayout extends AppLayout {
                 .set("display", "flex").set("align-items", "center")
                 .set("justify-content", "center").set("cursor", "pointer")
                 .set("user-select", "none");
-        avatar.setText("D");
+        avatar.setText(userInitial);
+        avatar.getElement().setAttribute("title", "Logout");
+        avatar.addClickListener(e -> authenticatedUser.logout());
 
-        HorizontalLayout right = new HorizontalLayout(docs, avatar);
+        HorizontalLayout right = new HorizontalLayout(refreshBtn, themeBtn, avatar);
         right.setAlignItems(FlexComponent.Alignment.CENTER);
-        right.getStyle().set("gap", "16px").set("margin-right", "4px");
+        right.getStyle().set("gap", "4px").set("margin-right", "4px");
 
         HorizontalLayout navbar = new HorizontalLayout(brand, right);
         navbar.setWidthFull();
@@ -91,7 +130,6 @@ public class MainLayout extends AppLayout {
     }
 
     private VerticalLayout buildDrawer() {
-        // Header
         HorizontalLayout header = new HorizontalLayout();
         header.setWidthFull();
         header.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -102,16 +140,17 @@ public class MainLayout extends AppLayout {
         title.getStyle()
                 .set("font-size", "10px").set("font-weight", "700")
                 .set("letter-spacing", "1px").set("text-transform", "uppercase")
-                .set("color", "#9ca3af");
+                .set("color", "var(--lumo-tertiary-text-color, #9ca3af)");
 
         Button newBtn = new Button(new Icon(VaadinIcon.PLUS));
         newBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
-        newBtn.getStyle().set("border", "none").set("color", "#9ca3af").set("padding", "2px");
+        newBtn.getStyle().set("border", "none")
+                .set("color", "var(--lumo-tertiary-text-color, #9ca3af)")
+                .set("padding", "2px");
         newBtn.getElement().setAttribute("title", "New endpoint");
         newBtn.addClickListener(e -> openCreateEndpointDialog());
         header.add(title, newBtn);
 
-        // List
         endpointListContainer = new VerticalLayout();
         endpointListContainer.setPadding(false);
         endpointListContainer.setSpacing(false);
@@ -121,14 +160,14 @@ public class MainLayout extends AppLayout {
         Scroller scroller = new Scroller(endpointListContainer);
         scroller.setWidthFull();
 
-        // Footer
         Hr sep = new Hr();
         sep.getStyle().set("margin", "0").set("border", "none")
-                .set("border-top", "1px solid #f3f4f6");
+                .set("border-top", "1px solid var(--hs-border, #f3f4f6)");
 
         Span footer = new Span("backendbrilliance.dev");
         footer.getStyle()
-                .set("font-size", "11px").set("color", "#9ca3af")
+                .set("font-size", "11px")
+                .set("color", "var(--lumo-tertiary-text-color, #9ca3af)")
                 .set("padding", "10px 16px").set("display", "block");
 
         VerticalLayout drawer = new VerticalLayout(header, scroller, sep, footer);
@@ -140,7 +179,9 @@ public class MainLayout extends AppLayout {
 
     public void refreshEndpointList() {
         endpointListContainer.removeAll();
-        List<Endpoint> endpoints = endpointService.getAllEndpoints();
+        List<Endpoint> endpoints = authenticatedUser.get()
+                .map(u -> endpointService.getEndpointsForUser(u.getId()))
+                .orElseGet(endpointService::getAllEndpoints);
 
         if (endpoints.isEmpty()) {
             Span empty = new Span("No endpoints yet");
@@ -156,7 +197,6 @@ public class MainLayout extends AppLayout {
     }
 
     private HorizontalLayout buildEndpointItem(Endpoint endpoint) {
-        // Green dot
         Div dot = new Div();
         dot.getStyle()
                 .set("width", "6px").set("height", "6px").set("border-radius", "50%")
@@ -170,17 +210,27 @@ public class MainLayout extends AppLayout {
         name.getStyle()
                 .set("font-size", "13px").set("font-weight", "500")
                 .set("white-space", "nowrap").set("overflow", "hidden")
-                .set("text-overflow", "ellipsis").set("color", "#374151");
+                .set("text-overflow", "ellipsis")
+                .set("color", "var(--lumo-secondary-text-color, #374151)");
 
         long count = requestService.countRequests(endpoint.getId());
         Span countBadge = new Span(String.valueOf(count));
         countBadge.getStyle()
-                .set("font-size", "11px").set("background", "#f3f4f6")
-                .set("color", "#6b7280").set("padding", "1px 7px")
-                .set("border-radius", "10px").set("flex-shrink", "0")
-                .set("font-weight", "500");
+                .set("font-size", "11px").set("background", "var(--hs-border-light, #f3f4f6)")
+                .set("color", "var(--lumo-secondary-text-color, #6b7280)")
+                .set("padding", "1px 7px").set("border-radius", "10px")
+                .set("flex-shrink", "0").set("font-weight", "500");
 
-        HorizontalLayout item = new HorizontalLayout(dot, name, countBadge);
+        // Delete button — visible on hover
+        Button deleteBtn = new Button(new Icon(VaadinIcon.TRASH));
+        deleteBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY,
+                ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_ERROR);
+        deleteBtn.getStyle().set("visibility", "hidden").set("padding", "2px")
+                .set("flex-shrink", "0");
+        deleteBtn.getElement().setAttribute("title", "Delete endpoint");
+        deleteBtn.addClickListener(e -> confirmDelete(endpoint, displayName));
+
+        HorizontalLayout item = new HorizontalLayout(dot, name, countBadge, deleteBtn);
         item.setWidthFull();
         item.setAlignItems(FlexComponent.Alignment.CENTER);
         item.getStyle()
@@ -190,16 +240,52 @@ public class MainLayout extends AppLayout {
                 .set("transition", "all 0.12s ease").set("gap", "8px");
         item.setFlexGrow(1, name);
 
-        item.getElement().addEventListener("mouseover", e ->
-                item.getStyle().set("background", "#f9fafb").set("border-left-color", "#3b4bdb"));
-        item.getElement().addEventListener("mouseout", e ->
-                item.getStyle().remove("background").set("border-left-color", "transparent"));
+        item.getElement().addEventListener("mouseover", e -> {
+            item.getStyle().set("background", "var(--hs-border-light, #f9fafb)")
+                    .set("border-left-color", "#3b4bdb");
+            name.getStyle().set("color", "var(--lumo-body-text-color, #111827)");
+            deleteBtn.getStyle().set("visibility", "visible");
+        });
+        item.getElement().addEventListener("mouseout", e -> {
+            item.getStyle().remove("background").set("border-left-color", "transparent");
+            name.getStyle().set("color", "var(--lumo-secondary-text-color, #374151)");
+            deleteBtn.getStyle().set("visibility", "hidden");
+        });
 
         item.addClickListener(e ->
                 item.getUI().ifPresent(ui ->
                         ui.navigate(DashboardView.class,
                                 new RouteParameters("slug", endpoint.getSlug()))));
         return item;
+    }
+
+    private void confirmDelete(Endpoint endpoint, String displayName) {
+        Dialog confirm = new Dialog();
+        confirm.setHeaderTitle("Delete endpoint?");
+
+        Paragraph msg = new Paragraph(
+                "All captured requests for \"" + displayName +
+                        "\" will be permanently deleted. This cannot be undone.");
+        msg.getStyle().set("color", "var(--lumo-secondary-text-color, #6b7280)")
+                .set("font-size", "13px");
+        confirm.add(msg);
+
+        Button confirmBtn = new Button("Delete", e -> {
+            endpointService.deleteEndpoint(endpoint.getId());
+            confirm.close();
+            refreshEndpointList();
+            getUI().ifPresent(ui -> ui.navigate(""));
+            Notification n = Notification.show("Endpoint deleted", 2000,
+                    Notification.Position.BOTTOM_END);
+            n.addThemeVariants(NotificationVariant.LUMO_CONTRAST);
+        });
+        confirmBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR);
+
+        Button cancelBtn = new Button("Cancel", e -> confirm.close());
+        cancelBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+
+        confirm.getFooter().add(cancelBtn, confirmBtn);
+        confirm.open();
     }
 
     private void openCreateEndpointDialog() {
@@ -212,7 +298,8 @@ public class MainLayout extends AppLayout {
         labelField.setWidthFull();
 
         Paragraph hint = new Paragraph("A unique capture URL will be generated automatically.");
-        hint.getStyle().set("font-size", "13px").set("color", "#6b7280").set("margin", "0");
+        hint.getStyle().set("font-size", "13px")
+                .set("color", "var(--lumo-tertiary-text-color, #6b7280)").set("margin", "0");
 
         VerticalLayout content = new VerticalLayout(labelField, hint);
         content.setPadding(false);
@@ -221,9 +308,13 @@ public class MainLayout extends AppLayout {
         Button create = new Button("Create endpoint", e -> {
             Endpoint created;
             try {
-                created = endpointService.createEndpoint(labelField.getValue());
+                java.util.UUID userId = authenticatedUser.get()
+                        .map(User::getId)
+                        .orElse(null);
+                created = endpointService.createEndpoint(labelField.getValue(), userId);
             } catch (TierLimitException ex) {
-                Notification n2 = Notification.show(ex.getMessage(), 4000, Notification.Position.MIDDLE);
+                Notification n2 = Notification.show(ex.getMessage(), 4000,
+                        Notification.Position.MIDDLE);
                 n2.addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return;
             }

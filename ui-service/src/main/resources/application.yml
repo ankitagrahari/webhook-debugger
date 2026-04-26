@@ -39,6 +39,11 @@ jwt:
   secret: "change-this-to-a-256-bit-secret-before-deploying-to-production"
   expiry-ms: 86400000
 
+razorpay:
+  key:
+    id: ${RAZORPAY_KEY_ID:rzp_test_placeholder}
+    secret: ${RAZORPAY_KEY_SECRET:placeholder}
+
 management:
   endpoints:
     web:

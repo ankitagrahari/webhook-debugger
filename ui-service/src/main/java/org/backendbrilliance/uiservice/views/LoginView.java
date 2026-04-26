@@ -3,6 +3,8 @@ package org.backendbrilliance.uiservice.views;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.login.LoginI18n;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
@@ -50,7 +52,14 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         loginForm.setAction("login");
         loginForm.setForgotPasswordButtonVisible(false);
 
-        VerticalLayout card = new VerticalLayout(logoArea, loginForm);
+        Span registerLink = new Span();
+        Anchor register = new Anchor("/register", "Create a free account");
+        register.getStyle().set("color", "#3b4bdb").set("font-weight", "500");
+        registerLink.getStyle().set("font-size", "13px").set("color", "#6b7280")
+                .set("text-align", "center");
+        registerLink.add(new Paragraph("No account? "), register);
+
+        VerticalLayout card = new VerticalLayout(logoArea, loginForm, registerLink);
         card.setAlignItems(Alignment.CENTER);
         card.setWidth("360px");
         card.getStyle()
@@ -69,7 +78,17 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        if (event.getLocation().getQueryParameters().getParameters().containsKey("error"))
+        var params = event.getLocation().getQueryParameters().getParameters();
+
+        if (params.containsKey("error")) {
             loginForm.setError(true);
+        }
+
+        if (params.containsKey("registered")) {
+            Notification n = Notification.show(
+                    "Account created! Sign in to get started.",
+                    4000, Notification.Position.TOP_CENTER);
+            n.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        }
     }
 }

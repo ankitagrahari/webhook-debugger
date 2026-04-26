@@ -29,6 +29,7 @@ import org.backendbrilliance.uiservice.entity.WebhookRequest;
 import org.backendbrilliance.uiservice.service.EndpointService;
 import org.backendbrilliance.uiservice.service.ReplayService;
 import org.backendbrilliance.uiservice.service.WebhookRequestService;
+import org.backendbrilliance.uiservice.service.security.AuthenticatedUser;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -50,6 +51,7 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
     private final EndpointService endpointService;
     private final WebhookRequestService requestService;
     private final ReplayService replayService;
+    private final AuthenticatedUser authenticatedUser;
 
     private Endpoint currentEndpoint;
     private Grid<WebhookRequest> requestGrid;
@@ -64,10 +66,11 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
 
     public DashboardView(EndpointService endpointService,
                          WebhookRequestService requestService,
-                         ReplayService replayService) {
+                         ReplayService replayService, AuthenticatedUser authenticatedUser) {
         this.endpointService = endpointService;
         this.requestService = requestService;
         this.replayService = replayService;
+        this.authenticatedUser = authenticatedUser;
         setSizeFull();
         setPadding(false);
         setSpacing(false);
@@ -84,7 +87,11 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
                     "The endpoint \"" + slug + "\" doesn't exist.", VaadinIcon.WARNING));
             return;
         }
-        currentTier = endpointService.getTierForUser(currentEndpoint.getUserId());
+
+        currentTier = authenticatedUser.get()
+                    .map(user -> endpointService.getTierForUser(user.getId()))
+                    .orElse(Tier.FREE);
+
         add(buildUrlBar());
         addAndExpand(buildMainContent());
     }

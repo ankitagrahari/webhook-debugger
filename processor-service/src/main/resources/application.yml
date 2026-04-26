@@ -47,6 +47,11 @@ management:
     health:
       show-details: always
 
+alerts:
+  slack:
+    webhook-url: ${SLACK_WEBHOOK_URL:}
+  inactivity-threshold-hours: 2
+
 logging:
   level:
     dev.webhookdebugger: DEBUG

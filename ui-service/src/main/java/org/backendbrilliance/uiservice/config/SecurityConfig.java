@@ -2,9 +2,11 @@ package org.backendbrilliance.uiservice.config;
 
 import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.spring.security.VaadinSecurityConfigurer;
+import org.backendbrilliance.uiservice.service.security.HookSpyUserDetailsService;
 import org.backendbrilliance.uiservice.views.LoginView;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
@@ -18,6 +20,12 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig{
+
+    private final HookSpyUserDetailsService userDetailsService;
+
+    public SecurityConfig(HookSpyUserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -59,12 +67,9 @@ public class SecurityConfig{
     }
 
     @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-        UserDetails userDetails = User.builder()
-                .username("dev@bb.com")
-                .password(passwordEncoder.encode("hookspy123"))
-                .roles("USER")
-                .build();
-        return new InMemoryUserDetailsManager(userDetails);
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
     }
 }

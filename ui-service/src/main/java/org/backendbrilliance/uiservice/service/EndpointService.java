@@ -33,7 +33,7 @@ public class EndpointService {
     }
 
     @Transactional
-    public Endpoint createEndpoint(String label, UUID userId) {
+    public Endpoint createEndpoint(String label, UUID userId, LocalDateTime expiresAt) {
 
         if (userId != null) {
             Tier tier = userRepository.findById(userId)
@@ -49,8 +49,10 @@ public class EndpointService {
         Endpoint endpoint = Endpoint.builder()
                 .id(UUID.randomUUID())
                 .slug(generateSlug())
+                .userId(userId)
                 .label(label != null && !label.isBlank() ? label : null)
                 .createdAt(LocalDateTime.now())
+                .expiresAt(expiresAt)
                 .build();
         Endpoint saved = endpointRepository.save(endpoint);
         log.info("Created endpoint [slug={}, label={}]", saved.getSlug(), saved.getLabel());
@@ -58,8 +60,13 @@ public class EndpointService {
     }
 
     @Transactional
+    public Endpoint createEndpoint(String label, UUID userId) {
+        return createEndpoint(label, userId, null);
+    }
+
+    @Transactional
     public Endpoint createEndpoint(String label) {
-        return createEndpoint(label, null);
+        return createEndpoint(label, null, null);
     }
 
     @Transactional
@@ -82,4 +89,9 @@ public class EndpointService {
         } while (endpointRepository.findBySlug(slug).isPresent());
         return slug;
     }
+
+    public List<Endpoint> getEndpointsForUser(UUID userId) {
+        return endpointRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    }
+
 }

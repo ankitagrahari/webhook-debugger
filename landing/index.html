@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HookSpy — Webhook Debugger for Developers</title>
+    <meta name="description" content="Capture, inspect and replay webhooks in real time. Built for developers integrating Stripe, Razorpay, GitHub and more.">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --accent: #3b4bdb;
+            --accent-light: rgba(59,75,219,0.08);
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --border: #e5e7eb;
+            --text: #111827;
+            --muted: #6b7280;
+            --success: #16a34a;
+            --mono: ui-monospace, 'Cascadia Code', Menlo, monospace;
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.6;
+        }
+
+        /* ── Nav ── */
+        nav {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .nav-brand { display: flex; align-items: center; gap: 8px; }
+
+        .nav-logo {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -0.4px;
+            text-decoration: none;
+        }
+
+        .nav-badge {
+            font-size: 9px;
+            font-weight: 700;
+            background: var(--accent-light);
+            color: var(--accent);
+            padding: 2px 6px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(59,75,219,0.2);
+        }
+
+        .nav-actions { display: flex; gap: 8px; align-items: center; }
+
+        .btn {
+            padding: 7px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            border: none;
+            transition: all 0.15s;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+
+        .btn-ghost:hover { background: #f3f4f6; color: var(--text); }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-primary:hover { background: #2f3cb5; }
+
+        /* ── Hero ── */
+        .hero {
+            max-width: 760px;
+            margin: 80px auto 60px;
+            padding: 0 24px;
+            text-align: center;
+        }
+
+        .hero-tag {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent);
+            background: var(--accent-light);
+            border: 1px solid rgba(59,75,219,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            letter-spacing: 0.3px;
+        }
+
+        .hero h1 {
+            font-size: clamp(28px, 5vw, 48px);
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -1px;
+            line-height: 1.15;
+            margin-bottom: 16px;
+        }
+
+        .hero h1 span { color: var(--accent); }
+
+        .hero p {
+            font-size: 17px;
+            color: var(--muted);
+            max-width: 540px;
+            margin: 0 auto 28px;
+            line-height: 1.7;
+        }
+
+        .hero-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+        .btn-large { padding: 11px 24px; font-size: 15px; }
+
+        /* ── URL Demo ── */
+        .url-demo {
+            max-width: 600px;
+            margin: 0 auto 70px;
+            padding: 0 24px;
+        }
+
+        .url-bar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+        }
+
+        .method-badge {
+            font-family: var(--mono);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: #dbeafe;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+            flex-shrink: 0;
+        }
+
+        .url-text {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--muted);
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .live-dot {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--success);
+            letter-spacing: 0.5px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+        /* ── Features ── */
+        .features {
+            max-width: 900px;
+            margin: 0 auto 80px;
+            padding: 0 24px;
+        }
+
+        .section-label {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 32px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+
+        .feature-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--accent-light);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .feature-card h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .feature-card p {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        /* ── Pricing ── */
+        .pricing {
+            max-width: 860px;
+            margin: 0 auto 80px;
+            padding: 0 24px;
+            text-align: center;
+        }
+
+        .pricing h2 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .pricing-sub {
+            font-size: 15px;
+            color: var(--muted);
+            margin-bottom: 36px;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 16px;
+            text-align: left;
+        }
+
+        .pricing-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .pricing-card.popular {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 1px var(--accent);
+        }
+
+        .pricing-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .pricing-card.popular .pricing-header {
+            background: var(--accent);
+        }
+
+        .pricing-card.popular .pricing-name,
+        .pricing-card.popular .pricing-price,
+        .pricing-card.popular .pricing-period { color: #fff; }
+
+        .pricing-popular-tag {
+            font-size: 10px;
+            font-weight: 700;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+
+        .pricing-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+
+        .pricing-price {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--accent);
+            letter-spacing: -0.5px;
+        }
+
+        .pricing-period { font-size: 13px; color: var(--muted); }
+
+        .pricing-features { padding: 16px 20px; }
+
+        .pricing-features li {
+            list-style: none;
+            font-size: 13px;
+            color: #374151;
+            padding: 4px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pricing-features li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .pricing-cta { padding: 0 20px 20px; }
+
+        .pricing-cta a {
+            display: block;
+            text-align: center;
+            padding: 9px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            border: 1px solid var(--border);
+            color: var(--text);
+            transition: all 0.15s;
+        }
+
+        .pricing-cta a:hover { background: #f9fafb; }
+
+        .pricing-card.popular .pricing-cta a {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .pricing-card.popular .pricing-cta a:hover { background: #2f3cb5; }
+
+        /* ── CTA banner ── */
+        .cta-banner {
+            background: var(--accent);
+            padding: 56px 24px;
+            text-align: center;
+        }
+
+        .cta-banner h2 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
+            letter-spacing: -0.3px;
+        }
+
+        .cta-banner p { font-size: 15px; color: rgba(255,255,255,0.8); margin-bottom: 24px; }
+
+        .btn-white {
+            background: #fff;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .btn-white:hover { background: #f0f0ff; }
+
+        /* ── Footer ── */
+        footer {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 24px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        footer a { color: var(--accent); text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+    <div class="nav-brand">
+        <a href="/" class="nav-logo">HookSpy</a>
+        <span class="nav-badge">BETA</span>
+    </div>
+    <div class="nav-actions">
+        <a href="/login" class="btn btn-ghost">Sign in</a>
+        <a href="/register" class="btn btn-primary">Get started free</a>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-tag">⚡ Built for developers</div>
+    <h1>Debug webhooks<br><span>without the guesswork</span></h1>
+    <p>Create a unique endpoint, point any service at it — Stripe, Razorpay,
+        GitHub, Shopify — and watch every request arrive in real time.
+        Inspect, replay, export.</p>
+    <div class="hero-actions">
+        <a href="/register" class="btn btn-primary btn-large">Create free endpoint</a>
+        <a href="#features" class="btn btn-ghost btn-large">See how it works</a>
+    </div>
+</section>
+
+<!-- URL demo -->
+<div class="url-demo">
+    <div class="url-bar">
+        <span class="method-badge">POST</span>
+        <span class="url-text">https://hookspy.dev/h/a3f9c2b1e847</span>
+        <span class="live-dot">● LIVE</span>
+    </div>
+</div>
+
+<!-- Features -->
+<section class="features" id="features">
+    <p class="section-label">What you get</p>
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Real-time capture</h3>
+            <p>Every incoming webhook appears on your dashboard within seconds.
+                No refresh needed.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🔁</div>
+            <h3>Replay any request</h3>
+            <p>Server was down when a webhook arrived? Replay it to any target URL
+                with one click — same headers, same body.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🔍</div>
+            <h3>Full inspection</h3>
+            <p>See every header, the full body with JSON pretty-printing,
+                and all query parameters.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📋</div>
+            <h3>cURL export</h3>
+            <p>Copy any request as a curl command and run it directly in your terminal.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🔔</div>
+            <h3>Alerts (Pro)</h3>
+            <p>Get Slack or email notifications when a webhook stops arriving
+                or starts returning errors.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">☁️</div>
+            <h3>Reliable pipeline</h3>
+            <p>Built on Kafka — events are buffered before processing so nothing
+                gets lost under load.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing -->
+<section class="pricing" id="pricing">
+    <h2>Simple pricing</h2>
+    <p class="pricing-sub">Start free. Upgrade when you need more.</p>
+    <div class="pricing-grid">
+        <div class="pricing-card">
+            <div class="pricing-header">
+                <div class="pricing-name">Free</div>
+                <div class="pricing-price">₹0</div>
+                <div class="pricing-period">forever</div>
+            </div>
+            <ul class="pricing-features">
+                <li>1 endpoint</li>
+                <li>100 requests / day</li>
+                <li>1 day history</li>
+                <li>Real-time dashboard</li>
+                <li>cURL export</li>
+            </ul>
+            <div class="pricing-cta"><a href="/register">Get started</a></div>
+        </div>
+
+        <div class="pricing-card popular">
+            <div class="pricing-header">
+                <div class="pricing-popular-tag">MOST POPULAR</div>
+                <div class="pricing-name">Pro</div>
+                <div class="pricing-price">₹299</div>
+                <div class="pricing-period">per month</div>
+            </div>
+            <ul class="pricing-features">
+                <li>10 endpoints</li>
+                <li>Unlimited requests</li>
+                <li>30 day history</li>
+                <li>Replay requests</li>
+                <li>Slack & email alerts</li>
+                <li>cURL export</li>
+            </ul>
+            <div class="pricing-cta"><a href="/register">Start Pro</a></div>
+        </div>
+
+        <div class="pricing-card">
+            <div class="pricing-header">
+                <div class="pricing-name">Team</div>
+                <div class="pricing-price">₹799</div>
+                <div class="pricing-period">per month</div>
+            </div>
+            <ul class="pricing-features">
+                <li>50 endpoints</li>
+                <li>Unlimited requests</li>
+                <li>90 day history</li>
+                <li>Shared workspace</li>
+                <li>Replay requests</li>
+                <li>Alerts</li>
+            </ul>
+            <div class="pricing-cta"><a href="/register">Start Team</a></div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-banner">
+    <h2>Ready to stop debugging blind?</h2>
+    <p>Create your free endpoint in 30 seconds. No credit card required.</p>
+    <a href="/register" class="btn btn-white btn-large">Create free account</a>
+</section>
+
+<footer>
+    <p>Built by <a href="https://dynamicallyblunttech.com">backendbrilliance.dev</a>
+        · <a href="/login">Sign in</a> · <a href="/register">Register</a></p>
+</footer>
+
+</body>
+</html>

@@ -143,6 +143,8 @@ public class UpgradeView extends VerticalLayout {
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({
                             paymentId: response.razorpay_payment_id,
+                            orderId: response.razorpay_order_id,
+                            signature: response.razorpay_signature,
                             tier: '%s',
                             userId: '%s'
                         })

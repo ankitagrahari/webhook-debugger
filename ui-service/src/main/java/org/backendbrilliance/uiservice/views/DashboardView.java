@@ -21,6 +21,7 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.shared.communication.PushMode;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
 import org.backendbrilliance.common.enums.Tier;
@@ -58,6 +59,7 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
     private VerticalLayout detailPanel;
     private Span liveIndicator;
     private Tier currentTier = Tier.FREE;
+    private Span requestCountBadge;
 
     private final ScheduledExecutorService scheduler =
             Executors.newSingleThreadScheduledExecutor();
@@ -165,22 +167,33 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
                 .set("color", "#6b7280");
 
         long count = requestService.countRequests(currentEndpoint.getId());
-        Span badge = new Span(count + " captured");
-        badge.getStyle().set("font-size", "12px").set("color", "#9ca3af")
+
+        requestCountBadge = new Span(count + " captured");
+
+        requestCountBadge.getStyle().set("font-size", "12px").set("color", "#9ca3af")
                 .set("background", "#f3f4f6").set("padding", "2px 8px")
                 .set("border-radius", "10px").set("font-weight", "500");
 
-        HorizontalLayout toolbar = new HorizontalLayout(title, badge);
+        HorizontalLayout toolbar = new HorizontalLayout(title, requestCountBadge);
         toolbar.setWidthFull();
         toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
         toolbar.getStyle().set("padding", "9px 16px").set("background", "#ffffff")
                 .set("border-bottom", "1px solid #e5e7eb").set("flex-shrink", "0");
-        toolbar.setFlexGrow(1, badge);
+        toolbar.setFlexGrow(1, requestCountBadge);
 
         requestGrid = new Grid<>(WebhookRequest.class, false);
         requestGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
         requestGrid.setSizeFull();
         requestGrid.setSelectionMode(Grid.SelectionMode.SINGLE);
+
+        requestGrid.addComponentColumn(req -> {
+            Div dot = new Div();
+            dot.getStyle()
+                    .set("width", "8px").set("height", "8px").set("border-radius", "50%")
+                    .set("background", "#16a34a")  // green = captured OK
+                    .set("margin", "auto");
+            return dot;
+        }).setWidth("40px").setFlexGrow(0).setHeader("");
 
         requestGrid.addComponentColumn(req -> buildMethodBadge(req.getMethod()))
                 .setHeader("Method").setWidth("100px").setFlexGrow(0);
@@ -463,6 +476,37 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
         empty.setAlignItems(FlexComponent.Alignment.CENTER);
         empty.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
         empty.getStyle().set("gap", "8px");
+
+        // Add if we're on the dashboard and have an endpoint
+        if (currentEndpoint != null) {
+            Div curlBox = new Div();
+            curlBox.getStyle()
+                    .set("background", "var(--hs-code-bg, #f6f8fa)")
+                    .set("border", "1px solid var(--hs-border, #e5e7eb)")
+                    .set("border-radius", "6px").set("padding", "10px 14px")
+                    .set("font-family", "var(--hs-monospace, monospace)")
+                    .set("font-size", "12px").set("color", "var(--hs-code-text, #24292f)")
+                    .set("margin-top", "12px").set("max-width", "420px")
+                    .set("cursor", "pointer");
+
+            String cmd = "curl -X POST http://localhost:8080/h/" +
+                    currentEndpoint.getSlug() +
+                    " -H \"Content-Type: application/json\" -d '{\"test\":true}'";
+            curlBox.setText(cmd);
+            curlBox.setTitle("Click to copy");
+            curlBox.addClickListener(e ->
+                    curlBox.getUI().ifPresent(ui ->
+                            ui.getPage().executeJs(
+                                    "navigator.clipboard.writeText($0)", cmd)));
+
+            Span hint = new Span("Click the command above to copy and send your first request");
+            hint.getStyle().set("font-size", "12px")
+                    .set("color", "var(--lumo-tertiary-text-color, #9ca3af)")
+                    .set("margin-top", "6px");
+
+            empty.add(curlBox, hint);
+        }
+
         return empty;
     }
 
@@ -480,13 +524,18 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         this.ui = attachEvent.getUI();
-        ui.getPushConfiguration().setPushMode(
-                com.vaadin.flow.shared.communication.PushMode.AUTOMATIC);
+        ui.getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
         pollingTask = scheduler.scheduleAtFixedRate(() -> {
             if (currentEndpoint == null || requestGrid == null) return;
             try {
                 List<WebhookRequest> fresh = requestService.getLatestRequests(currentEndpoint.getId(), currentTier);
-                ui.access(() -> requestGrid.setItems(fresh));
+                long totalCount = requestService.countRequests(currentEndpoint.getId());
+                ui.access(() -> {
+                    requestGrid.setItems(fresh);
+                    if (requestCountBadge != null) {
+                        requestCountBadge.setText(totalCount + " captured");
+                    }
+                });
             } catch (Exception e) {
                 log.warn("Polling error: {}", e.getMessage());
             }

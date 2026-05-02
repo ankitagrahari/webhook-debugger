@@ -43,7 +43,6 @@ public class MainLayout extends AppLayout {
     private final WebhookRequestService requestService;
     private VerticalLayout endpointListContainer;
     private final AuthenticatedUser authenticatedUser;
-    private final AtomicBoolean darkMode = new AtomicBoolean(false);
 
     public MainLayout(EndpointService endpointService,
                       WebhookRequestService requestService,
@@ -59,67 +58,59 @@ public class MainLayout extends AppLayout {
     private HorizontalLayout buildNavbar() {
         DrawerToggle toggle = new DrawerToggle();
 
+        // Brand
         Span appName = new Span("HookSpy");
         appName.getStyle()
-                .set("font-weight", "700").set("font-size", "17px")
-                .set("color", "var(--lumo-header-text-color, #111827)")
-                .set("letter-spacing", "-0.3px");
+                .set("font-weight", "800").set("font-size", "17px")
+                .set("color", "#111827").set("letter-spacing", "-0.4px");
 
         Span badge = new Span("BETA");
         badge.getStyle()
                 .set("font-size", "9px").set("font-weight", "700")
                 .set("background", "rgba(59,75,219,0.08)").set("color", "#3b4bdb")
                 .set("padding", "2px 7px").set("border-radius", "4px")
-                .set("letter-spacing", "0.6px").set("border", "1px solid rgba(59,75,219,0.2)");
+                .set("letter-spacing", "0.6px")
+                .set("border", "1px solid rgba(59,75,219,0.2)");
 
         HorizontalLayout brand = new HorizontalLayout(toggle, appName, badge);
         brand.setAlignItems(FlexComponent.Alignment.CENTER);
         brand.setSpacing(false);
         brand.getStyle().set("gap", "8px");
 
-        // Refresh — just refreshes sidebar list, no full reload
+        // Refresh button
         Button refreshBtn = new Button(new Icon(VaadinIcon.REFRESH));
         refreshBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
         refreshBtn.getElement().setAttribute("title", "Refresh endpoints");
-        refreshBtn.getStyle().set("color", "var(--lumo-secondary-text-color, #6b7280)");
+        refreshBtn.getStyle().set("color", "#9ca3af");
         refreshBtn.addClickListener(e -> refreshEndpointList());
 
-        // Dark / light toggle
-        Button themeBtn = new Button(new Icon(VaadinIcon.MOON));
-        themeBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
-        themeBtn.getElement().setAttribute("title", "Toggle dark mode");
-        themeBtn.getStyle().set("color", "var(--lumo-secondary-text-color, #6b7280)");
-        themeBtn.addClickListener(e -> {
-            boolean isDark = darkMode.get();
-            darkMode.set(!isDark);
-            themeBtn.setIcon(!isDark
-                    ? new Icon(VaadinIcon.SUN_O)
-                    : new Icon(VaadinIcon.MOON));
-            UI.getCurrent().getPage().executeJs(
-                    "document.querySelector('html').setAttribute('theme', $0);",
-                    !isDark ? "dark" : "light");
-        });
+        // Docs link
+        Anchor docs = new Anchor("#", "Docs");
+        docs.getStyle()
+                .set("font-size", "13px").set("color", "#6b7280")
+                .set("text-decoration", "none").set("font-weight", "500");
 
-        // Avatar + logout
-        String userInitial = authenticatedUser.get()
+        // User avatar — shows first letter of email, click to logout
+        String initial = authenticatedUser.get()
                 .map(u -> u.getEmail().substring(0, 1).toUpperCase())
                 .orElse("?");
 
         Div avatar = new Div();
+        avatar.setText(initial);
         avatar.getStyle()
-                .set("width", "30px").set("height", "30px").set("border-radius", "50%")
-                .set("background", "#3b4bdb").set("color", "#fff")
+                .set("width", "30px").set("height", "30px")
+                .set("border-radius", "50%")
+                .set("background", "#3b4bdb").set("color", "#ffffff")
                 .set("font-size", "12px").set("font-weight", "700")
                 .set("display", "flex").set("align-items", "center")
                 .set("justify-content", "center").set("cursor", "pointer")
-                .set("user-select", "none");
-        avatar.setText(userInitial);
+                .set("user-select", "none").set("flex-shrink", "0");
         avatar.getElement().setAttribute("title", "Logout");
         avatar.addClickListener(e -> authenticatedUser.logout());
 
-        HorizontalLayout right = new HorizontalLayout(refreshBtn, themeBtn, avatar);
+        HorizontalLayout right = new HorizontalLayout(refreshBtn, docs, avatar);
         right.setAlignItems(FlexComponent.Alignment.CENTER);
-        right.getStyle().set("gap", "4px").set("margin-right", "4px");
+        right.getStyle().set("gap", "8px").set("margin-right", "4px");
 
         HorizontalLayout navbar = new HorizontalLayout(brand, right);
         navbar.setWidthFull();
@@ -164,13 +155,44 @@ public class MainLayout extends AppLayout {
         sep.getStyle().set("margin", "0").set("border", "none")
                 .set("border-top", "1px solid var(--hs-border, #f3f4f6)");
 
-        Span footer = new Span("backendbrilliance.dev");
-        footer.getStyle()
-                .set("font-size", "11px")
-                .set("color", "var(--lumo-tertiary-text-color, #9ca3af)")
-                .set("padding", "10px 16px").set("display", "block");
+        Span userEmail = new Span(
+                authenticatedUser.get().map(u -> u.getEmail()).orElse(""));
+        userEmail.getStyle().set("font-size", "11px")
+                .set("color", "var(--lumo-secondary-text-color)")
+                .set("white-space", "nowrap").set("overflow", "hidden")
+                .set("text-overflow", "ellipsis");
 
-        VerticalLayout drawer = new VerticalLayout(header, scroller, sep, footer);
+        Span tierBadge = new Span(
+                authenticatedUser.get().map(u -> u.getTier().name()).orElse("FREE"));
+        tierBadge.getStyle()
+                .set("font-size", "9px").set("font-weight", "700")
+                .set("padding", "1px 6px").set("border-radius", "4px")
+                .set("flex-shrink", "0")
+                .set("background", "var(--hs-accent-light)")
+                .set("color", "var(--hs-accent)")
+                .set("border", "1px solid var(--hs-accent-light)");
+
+        // Upgrade link for FREE users
+        Anchor upgradeLink = new Anchor("/upgrade", "Upgrade ↗");
+        upgradeLink.getStyle().set("font-size", "11px").set("color", "var(--hs-accent)")
+                .set("font-weight", "600").set("text-decoration", "none");
+        upgradeLink.setVisible(
+                authenticatedUser.get()
+                        .map(u -> u.getTier() == Tier.FREE)
+                        .orElse(true));
+
+        HorizontalLayout userRow = new HorizontalLayout(userEmail, tierBadge);
+        userRow.setWidthFull();
+        userRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        userRow.getStyle().set("padding", "8px 16px 4px").set("gap", "6px");
+        userRow.setFlexGrow(1, userEmail);
+
+        VerticalLayout footerArea = new VerticalLayout(userRow, upgradeLink);
+        footerArea.setPadding(false);
+        footerArea.setSpacing(false);
+        footerArea.getStyle().set("padding", "0 16px 10px");
+
+        VerticalLayout drawer = new VerticalLayout(header, scroller, sep, footerArea);
         drawer.setSizeFull();
         drawer.setPadding(false);
         drawer.setSpacing(false);

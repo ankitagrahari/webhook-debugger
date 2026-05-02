@@ -1,111 +1,300 @@
-/* ─── Dark mode overrides ────────────────────────────────────── */
-/* Applied when JS sets document.documentElement[theme="dark"] */
+/* ═══════════════════════════════════════════════════════════════
+   HookSpy — Unified Light Theme
+   Matches landing page: #f8f9fa bg, #3b4bdb accent, white surfaces
+   ═══════════════════════════════════════════════════════════════ */
 
-[theme="dark"] {
-  --lumo-base-color: #0f1117;
-  --lumo-contrast-5pct: rgba(255,255,255,0.04);
-  --lumo-contrast-10pct: rgba(255,255,255,0.08);
-  --lumo-contrast-20pct: rgba(255,255,255,0.14);
-  --lumo-header-text-color: #f0f2f5;
-  --lumo-body-text-color: #c9d1d9;
-  --lumo-secondary-text-color: #8b949e;
-  --lumo-tertiary-text-color: #6e7681;
-  --lumo-primary-color: #6366f1;
-  --lumo-primary-color-10pct: rgba(99,102,241,0.1);
-  --lumo-success-color: #22c55e;
-  --lumo-success-color-10pct: rgba(34,197,94,0.1);
-  --lumo-error-color: #ef4444;
-  --lumo-error-color-10pct: rgba(239,68,68,0.1);
+:root {
+  /* Lumo overrides */
+  --lumo-base-color: #ffffff;
+  --lumo-body-text-color: #1f2937;
+  --lumo-secondary-text-color: #4b5563;
+  --lumo-tertiary-text-color: #9ca3af;
+  --lumo-header-text-color: #111827;
+  --lumo-disabled-text-color: #d1d5db;
+  --lumo-primary-color: #3b4bdb;
+  --lumo-primary-color-50pct: rgba(59,75,219,0.5);
+  --lumo-primary-color-10pct: rgba(59,75,219,0.08);
+  --lumo-primary-text-color: #3b4bdb;
+  --lumo-success-color: #16a34a;
+  --lumo-success-color-10pct: rgba(22,163,74,0.08);
+  --lumo-error-color: #dc2626;
+  --lumo-error-color-10pct: rgba(220,38,38,0.08);
+  --lumo-contrast-5pct: rgba(0,0,0,0.03);
+  --lumo-contrast-10pct: rgba(0,0,0,0.07);
+  --lumo-contrast-20pct: rgba(0,0,0,0.13);
 
-  --hs-bg: #0f1117;
-  --hs-surface: #161b22;
-  --hs-sidebar-bg: #161b22;
-  --hs-border: rgba(255,255,255,0.08);
-  --hs-border-light: rgba(255,255,255,0.04);
-  --hs-accent: #6366f1;
-  --hs-accent-light: rgba(99,102,241,0.1);
-  --hs-accent-hover: #818cf8;
-  --hs-code-bg: #0d1117;
+  /* HookSpy design tokens — same as landing page */
+  --hs-bg: #f8f9fa;
+  --hs-surface: #ffffff;
+  --hs-sidebar-bg: #ffffff;
+  --hs-border: #e5e7eb;
+  --hs-border-light: #f3f4f6;
+  --hs-accent: #3b4bdb;
+  --hs-accent-hover: #2f3cb5;
+  --hs-accent-light: rgba(59,75,219,0.07);
+  --hs-success: #16a34a;
+  --hs-error: #dc2626;
+  --hs-code-bg: #f6f8fa;
+  --hs-code-text: #24292f;
+  --hs-shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --hs-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  --hs-shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+  --hs-monospace: ui-monospace,'Cascadia Code','Source Code Pro',Menlo,Consolas,monospace;
+  --hs-font: 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
 }
 
-/* ─── Dark mode ─────────────────────────────────────────────── */
-html[theme="dark"] body,
-html[theme="dark"] {
-  background: #0f1117 !important;
-  color: #c9d1d9 !important;
+/* ─── Base ───────────────────────────────────────────────────── */
+html, body {
+  background: var(--hs-bg);
+  color: var(--lumo-body-text-color);
+  font-family: var(--hs-font);
+  -webkit-font-smoothing: antialiased;
 }
 
-html[theme="dark"] vaadin-app-layout::part(navbar) {
-  background: #161b22 !important;
-  border-bottom-color: rgba(255,255,255,0.08) !important;
+/* ─── App layout ─────────────────────────────────────────────── */
+vaadin-app-layout {
+  background: var(--hs-bg);
 }
 
-html[theme="dark"] vaadin-app-layout::part(drawer) {
-  background: #161b22 !important;
-  border-right-color: rgba(255,255,255,0.06) !important;
+vaadin-app-layout::part(navbar) {
+  background: var(--hs-surface);
+  border-bottom: 1px solid var(--hs-border);
+  box-shadow: var(--hs-shadow-sm);
+  min-height: 52px;
 }
 
-html[theme="dark"] vaadin-grid::part(header-cell) {
-  background: #1c2128 !important;
-  color: #6e7681 !important;
-  border-bottom-color: rgba(255,255,255,0.08) !important;
+vaadin-app-layout::part(drawer) {
+  background: var(--hs-sidebar-bg);
+  border-right: 1px solid var(--hs-border);
+  width: 220px;
+  box-shadow: var(--hs-shadow-sm);
 }
 
-html[theme="dark"] vaadin-grid::part(row) {
-  background: #0f1117 !important;
-  border-bottom-color: rgba(255,255,255,0.04) !important;
+/* ─── Grid ───────────────────────────────────────────────────── */
+vaadin-grid {
+  background: var(--hs-surface) !important;
+  border: none !important;
 }
 
-html[theme="dark"] vaadin-grid::part(row):hover {
-  background: rgba(255,255,255,0.03) !important;
+vaadin-grid::part(header-cell) {
+  background: #f9fafb !important;
+  color: #6b7280 !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.6px !important;
+  border-bottom: 1px solid var(--hs-border) !important;
+  padding: 8px 14px !important;
 }
 
-html[theme="dark"] vaadin-grid::part(selected-row) {
-  background: rgba(99,102,241,0.1) !important;
+vaadin-grid::part(row) {
+  background: var(--hs-surface) !important;
+  border-bottom: 1px solid var(--hs-border-light) !important;
+  transition: background 0.1s !important;
 }
 
-html[theme="dark"] vaadin-grid::part(cell) {
-  color: #c9d1d9 !important;
+vaadin-grid::part(row):hover {
+  background: #f9fafb !important;
+  cursor: pointer !important;
 }
 
-html[theme="dark"] vaadin-split-layout::part(splitter) {
-  background: rgba(255,255,255,0.08) !important;
+vaadin-grid::part(selected-row) {
+  background: var(--hs-accent-light) !important;
 }
 
-html[theme="dark"] vaadin-tabsheet::part(tabs-container) {
-  background: #161b22 !important;
-  border-bottom-color: rgba(255,255,255,0.08) !important;
+vaadin-grid::part(selected-row-cell) {
+  background: transparent !important;
 }
 
-html[theme="dark"] vaadin-tab {
-  color: #8b949e !important;
+vaadin-grid::part(cell) {
+  color: var(--lumo-body-text-color) !important;
+  font-size: 13px !important;
+  padding: 10px 14px !important;
+  border: none !important;
 }
 
-html[theme="dark"] vaadin-tab[selected] {
-  color: #c9d1d9 !important;
+/* ─── Split layout ───────────────────────────────────────────── */
+vaadin-split-layout::part(splitter) {
+  background: var(--hs-border) !important;
+  height: 3px !important;
+  transition: background 0.15s !important;
 }
 
-html[theme="dark"] vaadin-dialog-overlay::part(overlay) {
-  background: #1c2128 !important;
-  border-color: rgba(255,255,255,0.08) !important;
+vaadin-split-layout::part(splitter):hover {
+  background: var(--hs-accent) !important;
 }
 
-html[theme="dark"] vaadin-dialog-overlay::part(footer) {
-  background: #161b22 !important;
-  border-top-color: rgba(255,255,255,0.08) !important;
+vaadin-split-layout::part(handle) {
+  background: #9ca3af !important;
+  width: 32px !important;
+  height: 3px !important;
+  border-radius: 2px !important;
 }
 
-html[theme="dark"] vaadin-text-field::part(input-field) {
-  background: rgba(255,255,255,0.05) !important;
-  border-color: rgba(255,255,255,0.12) !important;
-  color: #c9d1d9 !important;
+/* ─── Tabs ───────────────────────────────────────────────────── */
+vaadin-tabsheet::part(tabs-container) {
+  background: var(--hs-surface) !important;
+  border-bottom: 1px solid var(--hs-border) !important;
 }
 
-html[theme="dark"] vaadin-button[theme~="tertiary"] {
-  color: #8b949e !important;
-  border-color: rgba(255,255,255,0.1) !important;
+vaadin-tab {
+  color: var(--lumo-secondary-text-color) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
 }
 
-html[theme="dark"] ::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.15) !important;
+vaadin-tab[selected] {
+  color: var(--hs-accent) !important;
+  font-weight: 600 !important;
 }
+
+vaadin-tab[selected]::after {
+  background: var(--hs-accent) !important;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────── */
+vaadin-button[theme~="primary"] {
+  background: var(--hs-accent) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  box-shadow: var(--hs-shadow-sm) !important;
+  transition: background 0.15s !important;
+}
+
+vaadin-button[theme~="primary"]:hover {
+  background: var(--hs-accent-hover) !important;
+  box-shadow: var(--hs-shadow) !important;
+}
+
+vaadin-button[theme~="tertiary"] {
+  color: var(--lumo-secondary-text-color) !important;
+  background: transparent !important;
+  border: 1px solid var(--hs-border) !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+  transition: all 0.15s !important;
+}
+
+vaadin-button[theme~="tertiary"]:hover {
+  background: var(--hs-border-light) !important;
+  color: var(--lumo-body-text-color) !important;
+  border-color: #d1d5db !important;
+}
+
+vaadin-button[theme~="error"] {
+  color: var(--hs-error) !important;
+}
+
+/* ─── Dialog ─────────────────────────────────────────────────── */
+vaadin-dialog-overlay::part(overlay) {
+  background: var(--hs-surface) !important;
+  border: 1px solid var(--hs-border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.12) !important;
+}
+
+vaadin-dialog-overlay::part(header) {
+  border-bottom: 1px solid var(--hs-border) !important;
+  padding: 16px 20px !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: var(--lumo-header-text-color) !important;
+}
+
+vaadin-dialog-overlay::part(content) {
+  padding: 16px 20px !important;
+}
+
+vaadin-dialog-overlay::part(footer) {
+  border-top: 1px solid var(--hs-border) !important;
+  padding: 12px 16px !important;
+  background: var(--hs-border-light) !important;
+  border-radius: 0 0 12px 12px !important;
+}
+
+/* ─── Text fields ────────────────────────────────────────────── */
+vaadin-text-field::part(label),
+vaadin-email-field::part(label),
+vaadin-password-field::part(label) {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--lumo-body-text-color) !important;
+}
+
+vaadin-text-field::part(input-field),
+vaadin-email-field::part(input-field),
+vaadin-password-field::part(input-field) {
+  background: var(--hs-surface) !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 6px !important;
+  color: var(--lumo-body-text-color) !important;
+  font-size: 13px !important;
+  box-shadow: var(--hs-shadow-sm) !important;
+  transition: border-color 0.15s, box-shadow 0.15s !important;
+}
+
+vaadin-text-field:hover::part(input-field),
+vaadin-email-field:hover::part(input-field),
+vaadin-password-field:hover::part(input-field) {
+  border-color: #9ca3af !important;
+}
+
+vaadin-text-field:focus-within::part(input-field),
+vaadin-email-field:focus-within::part(input-field),
+vaadin-password-field:focus-within::part(input-field) {
+  border-color: var(--hs-accent) !important;
+  box-shadow: 0 0 0 3px var(--hs-accent-light) !important;
+}
+
+vaadin-text-field::part(helper-text),
+vaadin-email-field::part(helper-text),
+vaadin-password-field::part(helper-text) {
+  font-size: 12px !important;
+  color: var(--lumo-tertiary-text-color) !important;
+}
+
+/* ─── Notification ───────────────────────────────────────────── */
+vaadin-notification-card::part(overlay) {
+  background: var(--hs-surface) !important;
+  border: 1px solid var(--hs-border) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--hs-shadow-md) !important;
+  color: var(--lumo-body-text-color) !important;
+}
+
+/* ─── Progress bar ───────────────────────────────────────────── */
+vaadin-progress-bar::part(bar) {
+  background: var(--hs-border) !important;
+  border-radius: 4px !important;
+}
+
+vaadin-progress-bar::part(value) {
+  background: var(--hs-accent) !important;
+  border-radius: 4px !important;
+}
+
+/* ─── Login form ─────────────────────────────────────────────── */
+vaadin-login-form-wrapper {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+vaadin-login-form {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+/* ─── Live indicator ─────────────────────────────────────────── */
+@keyframes livePulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.live-indicator { animation: livePulse 2.5s ease-in-out infinite; }

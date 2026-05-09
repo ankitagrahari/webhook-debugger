@@ -161,7 +161,7 @@ export default function RegisterPage() {
             @backendbrilliance
           </a>
         </div>
-      
+
       </div>
     </div>
   )

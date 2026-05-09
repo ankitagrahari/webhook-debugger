@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { Copy, Check, RotateCcw, X, ChevronDown, ChevronUp } from 'lucide-react'
+import { Copy, Check, RotateCcw, X, ChevronDown, ChevronUp, Zap } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { formatTimestamp } from '../lib/timeUtils'
 import api from '../lib/api'
 
 const TABS = ['Body', 'Headers', 'Query']
+
+// ── Shared sub-components ─────────────────────────────────────────────────────
 
 function CopyButton({ text, size = 13 }) {
   const [copied, setCopied] = useState(false)
@@ -24,10 +26,9 @@ function CopyButton({ text, size = 13 }) {
 function JsonDisplay({ text }) {
   try {
     const parsed = JSON.parse(text)
-    const pretty = JSON.stringify(parsed, null, 2)
     return (
       <pre className="text-xs font-mono text-white whitespace-pre-wrap break-all leading-relaxed">
-        {pretty}
+        {JSON.stringify(parsed, null, 2)}
       </pre>
     )
   } catch {
@@ -39,8 +40,26 @@ function JsonDisplay({ text }) {
   }
 }
 
-function buildCurl(request) {
-  const url = `http://localhost:8080/h/{slug}` // placeholder — real URL from endpoint
+export function BrandTag() {
+  return (
+    <div className="flex items-center gap-1 text-[10px] text-muted font-mono">
+      <Zap size={9} className="text-accent" />
+      <span>by</span>
+      <a
+        href="https://www.instagram.com/backendbrilliance"
+        target="_blank"
+        rel="noreferrer"
+        className="text-accent hover:text-accent-hover transition-colors"
+      >
+        backendbrilliance
+      </a>
+    </div>
+  )
+}
+
+// Build curl command using the real capture URL
+function buildCurl(request, captureUrl) {
+  const url = captureUrl || 'http://localhost:8080/h/unknown'
   const method = `-X ${request.method}`
   const headers = Object.entries(request.headers || {})
     .filter(([k]) => !['host', 'content-length', 'connection'].includes(k.toLowerCase()))
@@ -50,48 +69,59 @@ function buildCurl(request) {
   return `curl ${method} \\\n  ${headers}${body ? ` \\\n  ${body}` : ''} \\\n  "${url}"`
 }
 
-export default function RequestDetail({ request, onClose }) {
+// ── Main component ────────────────────────────────────────────────────────────
+
+export default function RequestDetail({ request, endpoint, onClose }) {
   const [tab, setTab] = useState('Body')
-  const [replayTarget, setReplayTarget] = useState('')
+  const [replayTarget, setReplayTarget] = useState(endpoint?.captureUrl || '')
   const [showReplay, setShowReplay] = useState(false)
   const [replayResult, setReplayResult] = useState(null)
+  const [replayError, setReplayError] = useState('')
+
+  // When endpoint loads (async), update replayTarget if still empty
+  const captureUrl = endpoint?.captureUrl || ''
 
   const replayMutation = useMutation({
     mutationFn: ({ id, targetUrl }) =>
       api.post(`/requests/${id}/replay`, { targetUrl }).then((r) => r.data),
     onSuccess: (data) => setReplayResult(data),
+    onError: (err) => setReplayError(err.response?.data?.message || 'Replay failed'),
   })
 
   if (!request) {
     return (
-      <div className="flex-1 flex items-center justify-center text-center px-6">
-        <div>
-          <p className="text-sm text-muted">Select a request to inspect</p>
-        </div>
+      <div className="flex-1 flex flex-col items-center justify-center text-center px-6 gap-4">
+        <p className="text-sm text-muted">Select a request to inspect</p>
+        <BrandTag />
       </div>
     )
   }
 
   const handleReplay = () => {
     if (!replayTarget.trim()) return
+    setReplayError('')
     replayMutation.mutate({ id: request.id, targetUrl: replayTarget.trim() })
   }
 
-  const curlCommand = buildCurl(request)
+  const curlCommand = buildCurl(request, captureUrl)
 
   return (
     <div className="flex-1 flex flex-col min-h-0 animate-fade_in">
+
       {/* Request meta header */}
       <div className="px-5 py-3 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className={cn('text-[10px] font-mono font-medium px-1.5 py-0.5 rounded uppercase',
-            `badge-${request.method}`)}>
+          <span className={cn(
+            'text-[10px] font-mono font-medium px-1.5 py-0.5 rounded uppercase',
+            `badge-${request.method}`
+          )}>
             {request.method}
           </span>
           <span className="text-xs font-mono text-muted">{request.sourceIp}</span>
           <span className="text-xs font-mono text-muted">{formatTimestamp(request.receivedAt)}</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <BrandTag />
           <CopyButton text={curlCommand} size={13} />
           <button onClick={onClose} className="text-muted hover:text-white transition-colors">
             <X size={14} />
@@ -175,26 +205,42 @@ export default function RequestDetail({ request, onClose }) {
         )}
       </div>
 
-      {/* Replay panel */}
-      <div className="border-t border-border">
+      {/* Replay & Export — highlighted with accent border */}
+      <div className="border-t-2 border-accent/40 bg-accent/5">
         <button
-          onClick={() => { setShowReplay(!showReplay); setReplayResult(null) }}
-          className="w-full flex items-center justify-between px-5 py-3 text-xs font-mono text-muted hover:text-white transition-colors"
+          onClick={() => {
+            setShowReplay(!showReplay)
+            setReplayResult(null)
+            setReplayError('')
+            // Pre-fill URL when opening panel
+            if (!showReplay && captureUrl && !replayTarget) {
+              setReplayTarget(captureUrl)
+            }
+          }}
+          className="w-full flex items-center justify-between px-5 py-3 text-xs font-mono text-accent hover:text-accent-hover transition-colors font-semibold"
         >
           <span className="flex items-center gap-2">
             <RotateCcw size={12} />
-            Replay request
+            Replay &amp; Export
           </span>
-          {showReplay ? <ChevronDown size={12} /> : <ChevronUp size={12} />}
+          {showReplay ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
         </button>
 
         {showReplay && (
           <div className="px-5 pb-4 space-y-3 animate-slide_in">
+
+            {replayError && (
+              <div className="px-3 py-2 rounded-lg bg-danger/10 border border-danger/30 text-danger text-xs font-mono">
+                {replayError}
+              </div>
+            )}
+
+            {/* Replay input — pre-filled with capture URL */}
             <div className="flex gap-2">
               <input
                 value={replayTarget}
                 onChange={(e) => setReplayTarget(e.target.value)}
-                placeholder="https://your-server.com/webhook"
+                placeholder={captureUrl || 'https://your-server.com/webhook'}
                 className="flex-1 bg-surface-3 border border-border rounded-lg px-3 py-2 text-xs font-mono text-white placeholder:text-muted focus:outline-none focus:border-accent/60 transition-colors"
               />
               <button
@@ -206,6 +252,7 @@ export default function RequestDetail({ request, onClose }) {
               </button>
             </div>
 
+            {/* Replay result */}
             {replayResult && (
               <div className="bg-surface-3 border border-border rounded-lg p-3 space-y-2 animate-fade_in">
                 <div className="flex items-center gap-3">
@@ -227,13 +274,7 @@ export default function RequestDetail({ request, onClose }) {
               </div>
             )}
 
-            {replayMutation.isError && (
-              <p className="text-xs text-danger font-mono">
-                {replayMutation.error?.response?.data?.message || 'Replay failed'}
-              </p>
-            )}
-
-            {/* cURL export */}
+            {/* cURL — uses real capture URL */}
             <div className="border border-border rounded-lg overflow-hidden">
               <div className="flex items-center justify-between px-3 py-2 border-b border-border bg-surface-3">
                 <span className="text-[10px] font-mono text-muted uppercase tracking-wider">cURL</span>

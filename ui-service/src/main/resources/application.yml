@@ -1,5 +1,7 @@
 server:
   port: 8082
+  tomcat:
+    connection-timeout: -1
 
 spring:
   main:
@@ -11,6 +13,9 @@ spring:
 
   application:
     name: ui-service
+  mvc:
+    async:
+      request-timeout: -1
 
   datasource:
     url: jdbc:postgresql://localhost:5432/webhookdb
@@ -38,6 +43,9 @@ spring:
 jwt:
   secret: "change-this-to-a-256-bit-secret-before-deploying-to-production"
   expiry-ms: 86400000
+
+capture:
+  base-url: http://localhost:8080
 
 razorpay:
   key:

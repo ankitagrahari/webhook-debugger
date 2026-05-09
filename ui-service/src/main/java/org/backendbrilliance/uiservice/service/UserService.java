@@ -1,5 +1,6 @@
 package org.backendbrilliance.uiservice.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.backendbrilliance.common.enums.Tier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +37,9 @@ public class UserService {
 
     @Transactional
     public User register(String email, String rawPassword, Tier tier) {
+        log.info("registering user by email: {}", email);
         if (existsByEmail(email)) {
+            log.error("email already exists");
             throw new EmailAlreadyExistsException("An account with this email already exists.");
         }
 
@@ -57,5 +60,13 @@ public class UserService {
     @Transactional
     public User register(String email, String rawPassword) {
         return register(email, rawPassword, Tier.FREE);
+    }
+
+    @Transactional
+    public void upgradeTier(String email, String tier) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + email));
+        user.setTier(Tier.valueOf(tier.toUpperCase()));
+        userRepository.save(user);
     }
 }

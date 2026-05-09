@@ -30,4 +30,16 @@ public interface WebhookRepository extends JpaRepository<WebhookRequest, UUID> {
             @Param("since") LocalDateTime since
     );
 
+    @Query("""
+        SELECT r FROM WebhookRequest r JOIN Endpoint e
+            on r.endpointId = e.id
+        WHERE e.slug = :slug
+        ORDER BY r.receivedAt DESC
+        LIMIT 100
+    """)
+    List<WebhookRequest> findRecentBySlug(
+            @Param("slug") String slug
+    );
+
+
 }

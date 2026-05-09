@@ -19,13 +19,13 @@ public class HookSpyUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email.toLowerCase().trim())
+        return userRepository.findByEmail(email.toLowerCase().trim())
+                .map(user -> org.springframework.security.core.userdetails.User
+                        .withUsername(user.getEmail())
+                        .password(user.getPasswordHash())
+                        .roles(user.getTier().name())
+                        .build()
+                )
                 .orElseThrow(() -> new UsernameNotFoundException("No user found: " + email));
-
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail())
-                .password(user.getPasswordHash())
-                .authorities(List.of(new SimpleGrantedAuthority("ROLE_" + user.getTier().name())))
-                .build();
     }
 }

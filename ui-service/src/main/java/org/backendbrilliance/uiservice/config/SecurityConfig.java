@@ -1,63 +1,47 @@
 package org.backendbrilliance.uiservice.config;
 
-import com.vaadin.flow.component.login.LoginForm;
-import com.vaadin.flow.spring.security.VaadinSecurityConfigurer;
-import org.backendbrilliance.uiservice.service.security.HookSpyUserDetailsService;
-import org.backendbrilliance.uiservice.views.LoginView;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableWebSecurity
 public class SecurityConfig{
 
-    private final HookSpyUserDetailsService userDetailsService;
-
-    public SecurityConfig(HookSpyUserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
-    }
-
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        /**
-         * Delegating the responsibility of general configuration
-         * of HTTP security to the VaadinSecurityConfigurer.
-         *
-         * It's configuring the following:
-         * - Vaadin's CSRF protection by ignoring internal framework requests,
-         * - default request cache,
-         * - ignoring public views annotated with @AnonymousAllowed,
-         * - restricting access to other views/endpoints, and
-         * - enabling ViewAccessChecker authorization.
-         */
-
-        // You can add any possible extra configurations of your own
-        // here - the following is just an example:
-        http.rememberMe(customizer -> customizer.alwaysRemember(false));
-
-        // Configure your static resources with public access before calling
-        // VaadinSecurityConfigurer.vaadin() as it adds final anyRequest matcher
-//        http.authorizeHttpRequests(auth -> {
-//            auth.requestMatchers("/admin-only/**").hasAnyRole("admin")
-//                    .requestMatchers("/public/**").permitAll();
-//        });
-
-        http.with(VaadinSecurityConfigurer.vaadin(), configurer -> {
-            // This is important to register your login view to the
-            // view access checker mechanism:
-            configurer.loginView(LoginView.class);
-        });
-
+    public SecurityFilterChain filterChain(HttpSecurity http) {
+        http
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/api/**") // React will handle CSRF separately
+                )
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                        .requestMatchers("/api/**").authenticated()
+                        .anyRequest().permitAll() // serves React static files
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((req, res, e) -> {
+                            res.setStatus(401);
+                            res.setContentType("application/json");
+                            res.getWriter().write("{\"error\":\"Unauthorized\"}");
+                        })
+                )
+                .sessionManagement(sess -> sess
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/api/auth/logout")
+                        .logoutSuccessHandler((req, res, auth) -> res.setStatus(200))
+                );
         return http.build();
     }
 
@@ -67,9 +51,10 @@ public class SecurityConfig{
     }
 
     @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder());
-        return provider;
+    public AuthenticationManager authenticationManager(
+            UserDetailsService uds, PasswordEncoder encoder) throws Exception {
+        var provider = new DaoAuthenticationProvider(uds);
+        provider.setPasswordEncoder(encoder);
+        return new ProviderManager(provider);
     }
 }

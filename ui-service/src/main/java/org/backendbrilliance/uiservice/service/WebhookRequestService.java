@@ -22,6 +22,10 @@ public class WebhookRequestService {
         return requestRepository.findRecentByEndpointId(endpointId, since);
     }
 
+    public List<WebhookRequest> getLatestRequests(String slug) {
+        return requestRepository.findRecentBySlug(slug);
+    }
+
     public List<WebhookRequest> getLatestRequests(UUID endpointId) {
         return getLatestRequests(endpointId, Tier.FREE);
     }

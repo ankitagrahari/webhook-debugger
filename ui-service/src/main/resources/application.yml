@@ -45,12 +45,12 @@ jwt:
   expiry-ms: 86400000
 
 capture:
-  base-url: http://localhost:8080
+  baseurl: http://localhost:8080
 
 razorpay:
   key:
-    id: ${RAZORPAY_KEY_ID:rzp_test_placeholder}
-    secret: ${RAZORPAY_KEY_SECRET:placeholder}
+    id: ${RAZORPAY_KEY_ID}
+    secret: ${RAZORPAY_KEY_SECRET}
 
 management:
   endpoints:

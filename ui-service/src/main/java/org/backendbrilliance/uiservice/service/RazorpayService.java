@@ -1,6 +1,7 @@
 package org.backendbrilliance.uiservice.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.backendbrilliance.uiservice.entity.RazorPayOrderConfig;
 import org.backendbrilliance.uiservice.entity.User;
 import org.backendbrilliance.uiservice.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,7 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.backendbrilliance.common.enums.Tier;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.time.LocalDateTime;
+import java.util.HexFormat;
 import java.util.UUID;
 
 @Slf4j
@@ -33,14 +37,14 @@ public class RazorpayService {
      * In production: create an order via Razorpay API and return order_id.
      * For MVP: return config directly, verify payment on callback.
      */
-    public RazorpayOrderConfig createOrder(Tier tier, User user) {
+    public RazorPayOrderConfig createOrder(Tier tier, User user) {
         int amountPaise = switch (tier) {
             case PRO  -> 29900;  // ₹299
             case TEAM -> 79900;  // ₹799
             default   -> 0;
         };
 
-        return new RazorpayOrderConfig(
+        return new RazorPayOrderConfig(
                 keyId,
                 amountPaise,
                 "INR",
@@ -66,12 +70,16 @@ public class RazorpayService {
         });
     }
 
-    public record RazorpayOrderConfig(
-            String keyId,
-            int amountPaise,
-            String currency,
-            String description,
-            String email,
-            String userId
-    ) {}
+    // ── HMAC-SHA256 verification ───────────────────────────────────────────────
+    public boolean verifySignature(String orderId, String paymentId, String signature) {
+        try {
+            String payload = orderId + "|" + paymentId;
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(keySecret.getBytes(), "HmacSHA256"));
+            String generated = HexFormat.of().formatHex(mac.doFinal(payload.getBytes()));
+            return generated.equals(signature);
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

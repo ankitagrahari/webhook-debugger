@@ -143,12 +143,25 @@ export default function RegisterPage() {
           </form>
         </div>
 
-        <p className="text-center text-sm text-muted mt-5">
-          Already have an account?{' '}
-          <Link to="/login" className="text-accent hover:text-accent-hover transition-colors">
-            Sign in
-          </Link>
-        </p>
+        {/* Footer */}
+        <div className="flex items-center justify-center gap-3 mt-5">
+            <p className="text-center text-sm text-muted">
+            <p className="text-center text-sm text-muted mt-5">
+                Already have an account?{' '}
+                <Link to="/login" className="text-accent hover:text-accent-hover transition-colors">
+                  Sign in
+                </Link>
+            </p>
+            </p>
+          <span className="text-muted text-xs">·</span>
+          <a href="https://www.instagram.com/backendbrilliance"
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs font-mono text-accent hover:text-accent-hover transition-colors">
+            @backendbrilliance
+          </a>
+        </div>
+      
       </div>
     </div>
   )

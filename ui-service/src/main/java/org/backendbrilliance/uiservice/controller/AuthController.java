@@ -25,12 +25,14 @@ public class AuthController {
 
     private final AuthenticationManager authManager;
     private final UserService userService;
+    private final MapperForEntityToDTO mapper;
 
     public AuthController(
             AuthenticationManager authManager,
-            UserService userService) {
+            UserService userService, MapperForEntityToDTO mapper) {
         this.authManager = authManager;
         this.userService = userService;
+        this.mapper = mapper;
     }
 
     // POST /api/auth/login
@@ -50,7 +52,7 @@ public class AuthController {
 
         var user = userService.findByEmail(req.email());
         return user
-                .map(value -> ResponseEntity.ok(MapperForEntityToDTO.userEntityToDTO(value)))
+                .map(value -> ResponseEntity.ok(mapper.userEntityToDTO(value)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -61,7 +63,7 @@ public class AuthController {
         var user = userService.register(req.email(), req.password(),
                 Tier.valueOf(req.tier().toUpperCase()));
         log.info("user registered: {}", user);
-        return ResponseEntity.status(201).body(MapperForEntityToDTO.userEntityToDTO(user));
+        return ResponseEntity.status(201).body(mapper.userEntityToDTO(user));
     }
 
     // GET /api/auth/me
@@ -71,7 +73,7 @@ public class AuthController {
                 .getAuthentication()).getName();
         var user = userService.findByEmail(email);
         return user
-                .map(value -> ResponseEntity.ok(MapperForEntityToDTO.userEntityToDTO(value)))
+                .map(value -> ResponseEntity.ok(mapper.userEntityToDTO(value)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

@@ -12,11 +12,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class MapperForEntityToDTO {
 
-    @Value("${capture.base-url:http://localhost:8080}")
-    private static String captureBaseUrl;
+    @Value("${capture.baseurl:http://localhost:8080}")
+    private String captureBaseUrl;
 
     //WebHookRequest to WebhookRequestResponse
-    public static WebhookRequestResponse webhookEntityToDTO(WebhookRequest request) {
+    public WebhookRequestResponse webhookEntityToDTO(WebhookRequest request) {
         return new WebhookRequestResponse(
                 request.getId().toString(),
                 request.getMethod(),
@@ -31,7 +31,7 @@ public class MapperForEntityToDTO {
     }
 
     //Endpoint to EndpointResponse
-    public static EndpointResponse endpointEntityToDTO(Endpoint request) {
+    public EndpointResponse endpointEntityToDTO(Endpoint request) {
         return new EndpointResponse(
                 request.getId().toString(),
                 request.getSlug(),
@@ -43,7 +43,7 @@ public class MapperForEntityToDTO {
     }
 
     //User to UserResponse
-    public static UserResponse userEntityToDTO(User user) {
+    public UserResponse userEntityToDTO(User user) {
         return new UserResponse(
                 user.getId().toString(),
                 user.getEmail(),

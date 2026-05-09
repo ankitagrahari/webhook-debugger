@@ -29,22 +29,24 @@ public class RequestController {
     private final ReplayService replayService;
     private final SseEmitterRegistry emitterRegistry;
     private final TaskScheduler scheduler;
+    private final MapperForEntityToDTO mapper;
 
     public RequestController(
             WebhookRequestService requestService,
             ReplayService replayService,
-            SseEmitterRegistry emitterRegistry, TaskScheduler scheduler) {
+            SseEmitterRegistry emitterRegistry, TaskScheduler scheduler, MapperForEntityToDTO mapper) {
         this.requestService = requestService;
         this.replayService = replayService;
         this.emitterRegistry = emitterRegistry;
         this.scheduler = scheduler;
+        this.mapper = mapper;
     }
 
     // GET history
     @GetMapping("/endpoints/{slug}/requests")
     public List<WebhookRequestResponse> list(@PathVariable String slug) {
         return requestService.getLatestRequests(slug)
-                .stream().map(MapperForEntityToDTO::webhookEntityToDTO).toList();
+                .stream().map(mapper::webhookEntityToDTO).toList();
     }
 
     // SSE stream

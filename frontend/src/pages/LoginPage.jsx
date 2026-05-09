@@ -80,12 +80,22 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <p className="text-center text-sm text-muted mt-5">
-          No account?{' '}
-          <Link to="/register" className="text-accent hover:text-accent-hover transition-colors">
-            Create one
-          </Link>
-        </p>
+        {/* Footer */}
+        <div className="flex items-center justify-center gap-3 mt-5">
+            <p className="text-center text-sm text-muted">
+            No account?{' '}
+            <Link to="/register" className="text-accent hover:text-accent-hover transition-colors">
+              Create one
+            </Link>
+          </p>
+          <span className="text-muted text-xs">·</span>
+          <a href="https://www.instagram.com/backendbrilliance"
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs font-mono text-accent hover:text-accent-hover transition-colors">
+            @backendbrilliance
+          </a>
+        </div>
       </div>
     </div>
   )

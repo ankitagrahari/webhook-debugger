@@ -17,27 +17,29 @@ import java.util.UUID;
 public class EndpointController {
 
     private final EndpointService endpointService;
-    private final AuthenticatedUser authenticatedUser; // keep existing bean
+    private final AuthenticatedUser authenticatedUser;
+    private final MapperForEntityToDTO mapper;
 
     public EndpointController(
             EndpointService endpointService,
-            AuthenticatedUser authenticatedUser) {
+            AuthenticatedUser authenticatedUser, MapperForEntityToDTO mapper) {
         this.endpointService = endpointService;
         this.authenticatedUser = authenticatedUser;
+        this.mapper = mapper;
     }
 
     @GetMapping
     public List<EndpointResponse> list() {
         var user = authenticatedUser.get().orElseThrow();
         return endpointService.getEndpointsForUser(user.getId())
-                .stream().map(MapperForEntityToDTO::endpointEntityToDTO).toList();
+                .stream().map(mapper::endpointEntityToDTO).toList();
     }
 
     @PostMapping
     public ResponseEntity<EndpointResponse> create(@RequestBody EndpointRequest req) {
         var user = authenticatedUser.get().orElseThrow();
         var endpoint = endpointService.createEndpoint(req.label(), user.getId());
-        return ResponseEntity.status(201).body(MapperForEntityToDTO.endpointEntityToDTO(endpoint));
+        return ResponseEntity.status(201).body(mapper.endpointEntityToDTO(endpoint));
     }
 
     @DeleteMapping("/{id}")

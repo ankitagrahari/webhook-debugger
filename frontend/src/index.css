@@ -3,24 +3,9 @@
 @tailwind utilities;
 
 @layer base {
-  * {
-    box-sizing: border-box;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  html, body, #root {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-  }
-
-  body {
-    background-color: #0a0a0f;
-    color: #e2e2f0;
-    font-family: 'DM Sans', system-ui, sans-serif;
-  }
-
-  /* Custom scrollbar */
+  * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+  html, body, #root { height: 100%; margin: 0; padding: 0; }
+  body { background-color: #0a0a0f; color: #e2e2f0; font-family: 'DM Sans', system-ui, sans-serif; }
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #2a2a3d; border-radius: 2px; }
@@ -28,15 +13,16 @@
 }
 
 @layer components {
-  /* Method badge colours */
-  .badge-GET    { @apply bg-success/15 text-success border border-success/30; }
-  .badge-POST   { @apply bg-accent/15 text-accent border border-accent/30; }
-  .badge-PUT    { @apply bg-warning/15 text-warning border border-warning/30; }
-  .badge-PATCH  { @apply bg-info/15 text-info border border-info/30; }
-  .badge-DELETE { @apply bg-danger/15 text-danger border border-danger/30; }
-  .badge-HEAD   { @apply bg-muted/15 text-muted border border-muted/30; }
+  /* Method badges */
+  .badge-GET    { @apply bg-emerald-500/15 text-emerald-400 border border-emerald-500/30; }
+  .badge-POST   { @apply bg-violet-500/15 text-violet-400 border border-violet-500/30; }
+  .badge-PUT    { @apply bg-amber-500/15 text-amber-400 border border-amber-500/30; }
+  .badge-PATCH  { @apply bg-sky-500/15 text-sky-400 border border-sky-500/30; }
+  .badge-DELETE { @apply bg-red-500/15 text-red-400 border border-red-500/30; }
+  .badge-HEAD   { @apply bg-slate-500/15 text-slate-400 border border-slate-500/30; }
 
-  .tier-FREE { @apply text-muted border-muted/30 bg-muted/10; }
-  .tier-PRO  { @apply text-accent border-accent/30 bg-accent/10; }
-  .tier-TEAM { @apply text-warning border-warning/30 bg-warning/10; }
+  /* Fix 4 — tier badges with distinct colours */
+  .tier-FREE  { @apply bg-surface-3 text-muted border-muted/40; }
+  .tier-PRO   { @apply bg-violet-500/15 text-violet-400 border-violet-500/40; }
+  .tier-TEAM  { @apply bg-amber-500/15 text-amber-400 border-amber-500/40; }
 }

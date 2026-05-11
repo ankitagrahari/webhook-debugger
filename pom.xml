@@ -18,7 +18,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <vaadin.version>25.1.2</vaadin.version>
+        <lombok.version>1.18.34</lombok.version>
         <spring-cloud.version>2025.1.1</spring-cloud.version>
     </properties>
 
@@ -39,14 +39,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <!-- Vaadin BOM -->
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>vaadin-bom</artifactId>
-                <version>${vaadin.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
+
             <!-- Internal modules -->
             <dependency>
                 <groupId>org.backendbrilliance</groupId>
@@ -70,22 +63,23 @@
     </dependencies>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                    <configuration>
-                        <excludes>
-                            <exclude>
-                                <groupId>org.projectlombok</groupId>
-                                <artifactId>lombok</artifactId>
-                            </exclude>
-                        </excludes>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
-
 </project>

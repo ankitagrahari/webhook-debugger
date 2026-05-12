@@ -10,11 +10,16 @@ const api = axios.create({
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (
-      err.response?.status === 401 &&
-      !window.location.pathname.startsWith('/login') &&
-      !window.location.pathname.startsWith('/register')
-    ) {
+    const status = err.response?.status
+    const url = err.config?.url || ''
+    const path = window.location.pathname
+
+    // Never redirect on /auth/me — that's how we check if logged in
+    // Never redirect if already on login or register
+    const isAuthCheck = url.includes('/auth/me')
+    const isAuthPage = path.startsWith('/login') || path.startsWith('/register')
+
+    if (status === 401 && !isAuthCheck && !isAuthPage) {
       window.location.href = '/login'
     }
     return Promise.reject(err)

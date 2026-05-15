@@ -30,6 +30,6 @@ public class RazorpayConfig {
 
         log.info("Trimmed keyId=[{}]", cleanKeyId);
 
-        return new RazorpayClient(keyId, keySecret);
+        return new RazorpayClient(cleanKeyId, cleanSecret);
     }
 }

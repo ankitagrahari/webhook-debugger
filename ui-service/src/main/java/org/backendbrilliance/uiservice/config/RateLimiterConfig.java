@@ -1,5 +1,6 @@
 package org.backendbrilliance.uiservice.config;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -9,7 +10,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Configuration(proxyBeanMethods = false)
 public class RateLimiterConfig implements WebMvcConfigurer {
@@ -24,9 +24,9 @@ public class RateLimiterConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new HandlerInterceptor() {
             @Override
-            public boolean preHandle(HttpServletRequest request,
-                                     HttpServletResponse response,
-                                     Object handler) throws Exception {
+            public boolean preHandle(@NonNull HttpServletRequest request,
+                                     @NonNull HttpServletResponse response,
+                                     @NonNull Object handler) throws Exception {
                 if (!request.getMethod().equals("POST") ||
                         !request.getRequestURI().equals("/api/auth/register")) {
                     return true;

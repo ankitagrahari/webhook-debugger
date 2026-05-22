@@ -153,18 +153,17 @@ export default function RegisterPage() {
                   Sign in
                 </Link>
             </p>
+              <span className="text-muted text-xs">·</span>
+              <a href="https://www.instagram.com/backendbrilliance"
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs font-mono text-accent hover:text-accent-hover transition-colors">
+                @backendbrilliance
+              </a>
             </p>
-          <span className="text-muted text-xs">·</span>
-          <a href="https://www.instagram.com/backendbrilliance"
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs font-mono text-accent hover:text-accent-hover transition-colors">
-            @backendbrilliance
-          </a>
         </div>
-
+        <div className="flex items-center justify-center gap-3 mt-5"><LegalFooter/></div>
       </div>
-      <LegalFooter/>
     </div>
   )
 }

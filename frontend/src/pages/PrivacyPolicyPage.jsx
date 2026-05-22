@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 const Section = ({ id, label, children }) => (
   <section id={id} className="mb-10">
-    <h2 className="font-mono text-xs font-semibold text-teal-400 tracking-widest uppercase mb-3 pb-2 border-b border-gray-800">
+    <h2 className="font-mono text-xs font-semibold text-accent tracking-widest uppercase mb-3 pb-2 border-b border-gray-800">
       {label}
     </h2>
     {children}
@@ -17,7 +17,7 @@ const Table = ({ headers, rows }) => (
           {headers.map((h) => (
             <th
               key={h}
-              className="font-mono text-xs text-teal-400 uppercase tracking-widest text-left px-3 py-2 border border-gray-800 bg-gray-900"
+              className="font-mono text-xs text-accent uppercase tracking-widest text-left px-3 py-2 border border-gray-800 bg-gray-900"
             >
               {h}
             </th>
@@ -44,17 +44,17 @@ export default function PrivacyPolicyPage() {
     <div className="min-h-screen bg-gray-950 text-gray-100">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-gray-800 bg-gray-950/90 backdrop-blur-md px-6 py-4 flex items-center gap-3">
-        <Link to="/" className="font-mono font-bold text-teal-400 text-lg">
+        <Link to="/" className="font-mono font-bold text-accent text-lg">
           Hook<span className="text-gray-100">Spy</span>
         </Link>
-        <span className="font-mono text-xs font-semibold bg-teal-400/10 text-teal-400 border border-teal-400/30 px-2 py-0.5 rounded tracking-widest uppercase">
+        <span className="font-mono text-xs font-semibold bg-teal-400/10 text-accent border border-teal-400/30 px-2 py-0.5 rounded tracking-widest uppercase">
           Legal
         </span>
       </header>
 
       <main className="max-w-3xl mx-auto px-6 py-12 pb-20">
         <h1 className="font-mono text-3xl font-bold text-gray-100 mb-1">
-          Privacy &amp; <span className="text-teal-400">Cookies Policy</span>
+          <span className="text-accent">Privacy &amp; Cookies Policy</span>
         </h1>
         <div className="flex flex-wrap gap-4 font-mono text-xs text-gray-500 mb-10">
           <span>Effective: 23 May 2025</span>
@@ -73,7 +73,7 @@ export default function PrivacyPolicyPage() {
             HookSpy operates hookspy.in and is the Data Fiduciary/Controller for all personal data
             processed under this policy.{" "}
             Contact:{" "}
-            <a href="mailto:support.hookspy@gmail.com" className="text-teal-400 hover:underline">
+            <a href="mailto:support.hookspy@gmail.com" className="text-accent hover:underline">
               support.hookspy@gmail.com
             </a>
           </p>
@@ -161,7 +161,7 @@ export default function PrivacyPolicyPage() {
             <li><strong className="text-gray-300">Erasure</strong> — Request deletion of your account and associated data</li>
             <li><strong className="text-gray-300">Portability</strong> — Receive your data in a machine-readable format</li>
             <li><strong className="text-gray-300">Withdraw Consent</strong> — Opt out of marketing communications at any time</li>
-            <li><strong className="text-gray-300">Grievance Redressal</strong> — File a complaint via <a href="mailto:support.hookspy@gmail.com" className="text-teal-400 hover:underline">support.hookspy@gmail.com</a></li>
+            <li><strong className="text-gray-300">Grievance Redressal</strong> — File a complaint via <a href="mailto:support.hookspy@gmail.com" className="text-accent hover:underline">support.hookspy@gmail.com</a></li>
           </ul>
           <p className="text-gray-400 text-sm mt-3">We will respond to data requests within 30 days.</p>
         </Section>
@@ -200,7 +200,7 @@ export default function PrivacyPolicyPage() {
           <p className="text-gray-400 text-sm leading-relaxed">
             HookSpy is not intended for users under the age of 18. We do not knowingly collect data
             from minors. Contact{" "}
-            <a href="mailto:support.hookspy@gmail.com" className="text-teal-400 hover:underline">
+            <a href="mailto:support.hookspy@gmail.com" className="text-accent hover:underline">
               support.hookspy@gmail.com
             </a>{" "}
             if you believe a minor has created an account.
@@ -217,7 +217,7 @@ export default function PrivacyPolicyPage() {
         <Section id="contact" label="11 — Contact &amp; Grievance Officer">
           <p className="text-gray-400 text-sm leading-relaxed">
             For privacy-related queries, data requests, or grievances:{" "}
-            <a href="mailto:support.hookspy@gmail.com" className="text-teal-400 hover:underline">
+            <a href="mailto:support.hookspy@gmail.com" className="text-accent hover:underline">
               support.hookspy@gmail.com
             </a>
             <br />
@@ -235,10 +235,10 @@ function LegalFooter() {
   return (
     <footer className="border-t border-gray-800 px-6 py-8 text-center font-mono text-xs text-gray-500">
       <nav className="flex flex-wrap gap-x-6 gap-y-2 justify-center mb-3">
-        <Link to="/terms" className="hover:text-teal-400 transition-colors">Terms &amp; Conditions</Link>
-        <Link to="/privacy-policy" className="hover:text-teal-400 transition-colors">Privacy &amp; Cookies</Link>
-        <Link to="/refund-policy" className="hover:text-teal-400 transition-colors">Refund &amp; Cancellation</Link>
-        <a href="mailto:support.hookspy@gmail.com" className="hover:text-teal-400 transition-colors">Support</a>
+        <Link to="/terms" className="hover:text-accent transition-colors">Terms &amp; Conditions</Link>
+        <Link to="/privacy-policy" className="hover:text-accent transition-colors">Privacy &amp; Cookies</Link>
+        <Link to="/refund-policy" className="hover:text-accent transition-colors">Refund &amp; Cancellation</Link>
+        <a href="mailto:support.hookspy@gmail.com" className="hover:text-accent transition-colors">Support</a>
       </nav>
       <p className="text-gray-600">© 2025 HookSpy. All rights reserved.</p>
     </footer>

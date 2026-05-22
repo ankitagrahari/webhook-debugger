@@ -24,20 +24,20 @@ export default function LegalFooter({ className = "" }) {
         aria-label="Legal links"
         className="flex flex-wrap gap-x-6 gap-y-2 justify-center mb-4"
       >
-        <Link to="/terms" className="hover:text-teal-400 transition-colors duration-150">
+        <Link to="/terms" className="hover:text-accent-hover transition-colors duration-150">
           Terms &amp; Conditions
         </Link>
-        <Link to="/privacy-policy" className="hover:text-teal-400 transition-colors duration-150">
+        <Link to="/privacy-policy" className="hover:text-accent-hover transition-colors duration-150">
           Privacy &amp; Cookies
         </Link>
-        <Link to="/refund-policy" className="hover:text-teal-400 transition-colors duration-150">
+        <Link to="/refund-policy" className="hover:text-accent-hover transition-colors duration-150">
           Refund &amp; Cancellation
         </Link>
         <a
           href="mailto:support.hookspy@gmail.com"
-          className="hover:text-teal-400 transition-colors duration-150"
+          className="hover:text-accent-hover transition-colors duration-150"
         >
-          support.hookspy@gmail.com
+        Support
         </a>
       </nav>
 

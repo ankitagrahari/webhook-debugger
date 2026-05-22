@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 const Section = ({ id, label, children }) => (
   <section id={id} className="mb-10">
-    <h2 className="font-mono text-xs font-semibold text-teal-400 tracking-widest uppercase mb-3 pb-2 border-b border-gray-800">
+    <h2 className="font-mono text-xs font-semibold text-accent tracking-widest uppercase mb-3 pb-2 border-b border-gray-800">
       {label}
     </h2>
     {children}
@@ -20,17 +20,17 @@ export default function TermsPage() {
     <div className="min-h-screen bg-gray-950 text-gray-100">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-gray-800 bg-gray-950/90 backdrop-blur-md px-6 py-4 flex items-center gap-3">
-        <Link to="/" className="font-mono font-bold text-teal-400 text-lg">
+        <Link to="/" className="font-mono font-bold text-accent text-lg">
           Hook<span className="text-gray-100">Spy</span>
         </Link>
-        <span className="font-mono text-xs font-semibold bg-teal-400/10 text-teal-400 border border-teal-400/30 px-2 py-0.5 rounded tracking-widest uppercase">
+        <span className="font-mono text-xs font-semibold bg-teal-400/10 text-accent border border-teal-400/30 px-2 py-0.5 rounded tracking-widest uppercase">
           Legal
         </span>
       </header>
 
       <main className="max-w-3xl mx-auto px-6 py-12 pb-20">
         <h1 className="font-mono text-3xl font-bold text-gray-100 mb-1">
-          Terms &amp; <span className="text-teal-400">Conditions</span>
+          <span className="text-accent">Terms &amp; Conditions</span>
         </h1>
         <div className="flex flex-wrap gap-4 font-mono text-xs text-gray-500 mb-10">
           <span>Effective: 23 May 2025</span>
@@ -101,7 +101,7 @@ export default function TermsPage() {
           <p className="text-gray-400 text-sm leading-relaxed">
             You are responsible for maintaining the confidentiality of your account credentials.
             Notify us immediately at{" "}
-            <a href="mailto:security@hookspy.in" className="text-teal-400 hover:underline">
+            <a href="mailto:security@hookspy.in" className="text-accent hover:underline">
               security@hookspy.in
             </a>{" "}
             if you suspect unauthorised access. We are not liable for losses resulting from
@@ -114,7 +114,7 @@ export default function TermsPage() {
             HookSpy offers subscription-based plans billed monthly or annually. Payments are
             processed by Razorpay. All prices are in Indian Rupees (INR) inclusive of applicable
             GST. Subscription and refund terms are governed by our{" "}
-            <Link to="/refund-policy" className="text-teal-400 hover:underline">
+            <Link to="/refund-policy" className="text-accent hover:underline">
               Refund &amp; Cancellation Policy
             </Link>.
           </p>
@@ -125,7 +125,7 @@ export default function TermsPage() {
             Webhook payloads captured via HookSpy may contain sensitive data. You are solely
             responsible for ensuring that capturing such data complies with applicable data
             protection laws (including India's DPDP Act 2023). Refer to our{" "}
-            <Link to="/privacy-policy" className="text-teal-400 hover:underline">
+            <Link to="/privacy-policy" className="text-accent hover:underline">
               Privacy Policy
             </Link>{" "}
             for full details.
@@ -154,7 +154,7 @@ export default function TermsPage() {
             We may terminate or suspend your account at our sole discretion for violations of these
             Terms, non-payment, or any activity we deem harmful. You may cancel your subscription at
             any time; cancellation terms are in the{" "}
-            <Link to="/refund-policy" className="text-teal-400 hover:underline">
+            <Link to="/refund-policy" className="text-accent hover:underline">
               Refund &amp; Cancellation Policy
             </Link>.
           </p>
@@ -171,7 +171,7 @@ export default function TermsPage() {
         <Section id="contact" label="12 — Contact">
           <p className="text-gray-400 text-sm leading-relaxed">
             For questions regarding these Terms:{" "}
-            <a href="mailto:legal@hookspy.in" className="text-teal-400 hover:underline">
+            <a href="mailto:legal@hookspy.in" className="text-accent hover:underline">
               legal@hookspy.in
             </a>
           </p>
@@ -187,10 +187,10 @@ function LegalFooter() {
   return (
     <footer className="border-t border-gray-800 px-6 py-8 text-center font-mono text-xs text-gray-500">
       <nav className="flex flex-wrap gap-x-6 gap-y-2 justify-center mb-3">
-        <Link to="/terms" className="hover:text-teal-400 transition-colors">Terms &amp; Conditions</Link>
-        <Link to="/privacy-policy" className="hover:text-teal-400 transition-colors">Privacy &amp; Cookies</Link>
-        <Link to="/refund-policy" className="hover:text-teal-400 transition-colors">Refund &amp; Cancellation</Link>
-        <a href="mailto:support.hookspy@gmail.com" className="hover:text-teal-400 transition-colors">Support</a>
+        <Link to="/terms" className="hover:text-accent transition-colors">Terms &amp; Conditions</Link>
+        <Link to="/privacy-policy" className="hover:text-accent transition-colors">Privacy &amp; Cookies</Link>
+        <Link to="/refund-policy" className="hover:text-accent transition-colors">Refund &amp; Cancellation</Link>
+        <a href="mailto:support.hookspy@gmail.com" className="hover:text-accent transition-colors">Support</a>
       </nav>
       <p className="text-gray-600">© 2025 HookSpy. All rights reserved.</p>
     </footer>

@@ -242,9 +242,8 @@ export default function UpgradePage() {
             @backendbrilliance
           </a>
         </div>
-
+        <div className="flex items-center justify-center gap-3 mt-5"><LegalFooter/></div>
       </div>
-      <LegalFooter/>
     </div>
   )
 }

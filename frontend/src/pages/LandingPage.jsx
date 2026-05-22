@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Zap, Check, ArrowRight, Copy, Terminal, Eye, RotateCcw, ChevronRight } from 'lucide-react'
 import { cn } from '../lib/utils'
+import LegalFooter from "../components/LegalFooter";
 
 // ── Animated terminal that types out a curl command ───────────────────────────
 function TerminalDemo() {
@@ -521,6 +522,7 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+      <LegalFooter />
     </div>
   )
 }

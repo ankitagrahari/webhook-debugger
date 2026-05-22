@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Zap } from 'lucide-react'
+import LegalFooter from "../components/LegalFooter";
 
 export default function LoginPage() {
   const { login } = useAuth()
@@ -97,6 +98,7 @@ export default function LoginPage() {
           </a>
         </div>
       </div>
+      <LegalFooter />
     </div>
   )
 }

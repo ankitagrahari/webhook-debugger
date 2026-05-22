@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Zap, Check } from 'lucide-react'
 import { cn } from '../lib/utils'
+import LegalFooter from "../components/LegalFooter";
 
 const TIERS = [
   {
@@ -163,6 +164,7 @@ export default function RegisterPage() {
         </div>
 
       </div>
+      <LegalFooter/>
     </div>
   )
 }

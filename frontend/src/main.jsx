@@ -12,6 +12,9 @@ import RegisterPage from './pages/RegisterPage'
 import HomePage from './pages/HomePage'
 import DashboardPage from './pages/DashboardPage'
 import UpgradePage from './pages/UpgradePage'
+import TermsPage from "./pages/TermsPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import RefundPolicyPage from "./pages/RefundPolicyPage";
 import './index.css'
 
 const queryClient = new QueryClient({
@@ -57,19 +60,19 @@ ReactDOM.createRoot(document.getElementById('root')).render(
               <Route path="/" element={<RootRoute />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/terms"          element={<TermsPage />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+              <Route path="/refund-policy"  element={<RefundPolicyPage />} />
+
 
               {/* Protected routes */}
-              <Route
-                path="/dashboard/:slug"
-                element={
+              <Route path="/dashboard/:slug" element={
                   <ProtectedRoute>
                     <DashboardPage />
                   </ProtectedRoute>
                 }
               />
-              <Route
-                path="/upgrade"
-                element={
+              <Route path="/upgrade" element={
                   <ProtectedRoute>
                     <UpgradePage />
                   </ProtectedRoute>

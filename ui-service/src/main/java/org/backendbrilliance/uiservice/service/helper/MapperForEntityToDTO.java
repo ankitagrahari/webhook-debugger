@@ -47,7 +47,8 @@ public class MapperForEntityToDTO {
         return new UserResponse(
                 user.getId().toString(),
                 user.getEmail(),
-                user.getTier().toString()
+                user.getTier().toString(),
+                user.getRole()
         );
     }
 }

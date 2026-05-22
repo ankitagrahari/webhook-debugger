@@ -48,6 +48,7 @@ public class UserService {
                 .email(email.toLowerCase().trim())
                 .passwordHash(passwordEncoder.encode(rawPassword))
                 .tier(null!=tier ? tier: Tier.FREE)
+                .role("USER")
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();

@@ -29,6 +29,9 @@ public class User {
     @Column(nullable = false)
     private Tier tier;
 
+    @Column(nullable = false)
+    private String role = "USER";
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 

@@ -26,6 +26,7 @@ public class SecurityConfig{
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                         .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().permitAll() // serves React static files
                 )
                 .exceptionHandling(ex -> ex
@@ -33,6 +34,12 @@ public class SecurityConfig{
                             res.setStatus(401);
                             res.setContentType("application/json");
                             res.getWriter().write("{\"error\":\"Unauthorized\"}");
+                        })
+                        .accessDeniedHandler((req, res, e) -> {
+                            res.setStatus(403);
+                            res.setContentType("application/json");
+                            res.getWriter().write(
+                                    "{\"error\":\"Forbidden\"}");
                         })
                 )
                 .sessionManagement(sess -> sess

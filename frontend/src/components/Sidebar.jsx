@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Trash2, Zap, LogOut, ChevronRight, CreditCard, AlertCircle } from 'lucide-react'
+import { Plus, Trash2, Zap, LogOut, ChevronRight, CreditCard, AlertCircle, HelpCircle } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { useAuth } from '../context/AuthContext'
 import api from '../lib/api'
@@ -204,11 +204,17 @@ export default function Sidebar() {
               {tier}
             </span>
           </div>
+
+          <a href="mailto:support@hookspy.in"
+            className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs text-muted hover:text-white hover:bg-surface-3 transition-colors">
+            <HelpCircle size={12} />
+            support@hookspy.in
+          </a>
+
           <button
             onClick={logout}
             className="text-muted hover:text-white transition-colors shrink-0 ml-2"
-            title="Sign out"
-          >
+            title="Sign out">
             <LogOut size={13} />
           </button>
         </div>

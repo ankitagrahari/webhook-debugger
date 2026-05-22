@@ -216,17 +216,65 @@ export default function UpgradePage() {
         )}
 
         {/* CTA button */}
-        <button
-          onClick={handleCheckout}
-          disabled={loading || tier === selected}
-          className="w-full bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 rounded-xl transition-colors"
-        >
-          {loading
-            ? 'Opening checkout…'
-            : tier === selected
-            ? `Already on ${selected}`
-            : `Upgrade to ${currentPlan?.label} — ${currentPlan?.priceLabel}/mo`}
-        </button>
+{/*         <button */}
+{/*           onClick={handleCheckout} */}
+{/*           disabled={loading || tier === selected} */}
+{/*           className="w-full bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 rounded-xl transition-colors" */}
+{/*         > */}
+{/*           {loading */}
+{/*             ? 'Opening checkout…' */}
+{/*             : tier === selected */}
+{/*             ? `Already on ${selected}` */}
+{/*             : `Upgrade to ${currentPlan?.label} — ${currentPlan?.priceLabel}/mo`} */}
+{/*         </button> */}
+
+        // Replace the checkout button section with this
+        <div className="space-y-4">
+          <div className="bg-surface-2 border border-accent/30 rounded-xl p-5">
+            <p className="text-white font-semibold text-sm mb-1">
+              Pay via UPI
+            </p>
+            <p className="text-muted text-sm mb-4">
+              Send payment to the UPI ID below, then email your
+              transaction ID and account email to get upgraded instantly.
+            </p>
+
+            {/* UPI ID display */}
+            <div className="bg-surface-3 border border-border rounded-lg px-4 py-3 flex items-center justify-between mb-3">
+              <span className="font-mono text-accent text-sm">
+                silver-voyager-1989@yescred   {/* replace with your actual UPI ID */}
+              </span>
+              <CopyButton text="hookspy@upi" />
+            </div>
+
+            {/* Amount for selected plan */}
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-2xl font-bold font-mono text-white">
+                ₹{selected === 'PRO' ? '299' : '799'}
+              </span>
+              <span className="text-muted text-sm">/month</span>
+            </div>
+
+            {/* Instructions */}
+            <ol className="space-y-2 text-sm text-muted">
+              <li className="flex gap-2">
+                <span className="text-accent font-mono">1.</span>
+                Pay ₹{selected === 'PRO' ? '299' : '799'} to the UPI ID above
+              </li>
+              <li className="flex gap-2">
+                <span className="text-accent font-mono">2.</span>
+                Email your transaction ID + this account email to:
+              </li>
+            </ol>
+
+            <div className="bg-surface-3 border border-border rounded-lg px-4 py-2 mt-2 font-mono text-sm text-white">
+              support.hookspy@gmail.com
+            </div>
+            <p className="text-muted text-xs mt-3">
+              Upgrades processed within 2 hours. Usually much faster.
+            </p>
+          </div>
+        </div>
 
         {/* Footer */}
         <div className="flex items-center justify-center gap-3 mt-5">

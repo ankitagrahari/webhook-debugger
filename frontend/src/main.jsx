@@ -12,6 +12,7 @@ import RegisterPage from './pages/RegisterPage'
 import HomePage from './pages/HomePage'
 import DashboardPage from './pages/DashboardPage'
 import UpgradePage from './pages/UpgradePage'
+import ContactPage from './pages/ContactPage'
 import './index.css'
 
 const queryClient = new QueryClient({
@@ -57,6 +58,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
               <Route path="/" element={<RootRoute />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/contact" element={<ContactPage />} />
 
               {/* Protected routes */}
               <Route

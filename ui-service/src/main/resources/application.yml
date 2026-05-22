@@ -45,7 +45,8 @@ jwt:
   expiry-ms: 86400000
 
 capture:
-  baseurl: https://hookspy.in
+  baseurl: http://localhost:5173
+#  https://hookspy.in
 
 razorpay:
   key:

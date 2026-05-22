@@ -515,8 +515,14 @@ export default function LandingPage() {
             >
               Blog
             </a>
+            <a href="mailto:support.hookspy@gmail.com" className="hover:text-white transition-colors">
+                Support
+            </a>
             <Link to="/login" className="hover:text-white transition-colors">
               Sign in
+            </Link>
+            <Link to="/contact" className="hover:text-white transition-colors">
+              Contact
             </Link>
           </div>
         </div>

@@ -229,7 +229,7 @@ export default function UpgradePage() {
 
         {/* Footer */}
         <div className="flex items-center justify-center gap-3 mt-5">
-          <p className="text-xs text-muted">Powered by Razorpay · Secure payment</p>
+          <p className="text-xs text-muted">Powered by CashFree · Secure payment</p>
           <span className="text-muted text-xs">·</span>
           <a
             href="https://www.instagram.com/backendbrilliance"

@@ -112,7 +112,7 @@ export default function TermsPage() {
         <Section id="payments" label="06 — Subscription &amp; Payments">
           <p className="text-gray-400 text-sm leading-relaxed">
             HookSpy offers subscription-based plans billed monthly or annually. Payments are
-            processed by Razorpay. All prices are in Indian Rupees (INR) inclusive of applicable
+            processed by Cashfree. All prices are in Indian Rupees (INR) inclusive of applicable
             GST. Subscription and refund terms are governed by our{" "}
             <Link to="/refund-policy" className="text-accent hover:underline">
               Refund &amp; Cancellation Policy

@@ -193,7 +193,7 @@ export default function RefundPolicyPage() {
               </code>
             </li>
             <li>Your registered account email address</li>
-            <li>Razorpay transaction ID or receipt number</li>
+            <li>CashFree transaction ID or receipt number</li>
             <li>Reason for the refund request</li>
           </ul>
           <p className="text-gray-400 text-sm">

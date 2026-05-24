@@ -36,7 +36,7 @@ src/
 │   ├── RegisterPage.jsx     # Tier selector
 │   ├── HomePage.jsx         # Redirects to first endpoint or empty state
 │   ├── DashboardPage.jsx    # 3-panel layout
-│   └── UpgradePage.jsx      # Razorpay checkout
+│   └── UpgradePage.jsx      # CashFree checkout
 └── lib/
     ├── api.js               # Axios instance (session cookies, 401 redirect)
     ├── utils.js             # cn() helper

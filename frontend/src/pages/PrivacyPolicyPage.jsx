@@ -115,7 +115,7 @@ export default function PrivacyPolicyPage() {
           </h3>
           <p className="text-gray-400 text-sm">
             We do not store card numbers or bank details. Payment processing is handled entirely by
-            Razorpay. We receive only transaction confirmation and masked payment identifiers.
+            CashFree. We receive only transaction confirmation and masked payment identifiers.
           </p>
         </Section>
 
@@ -146,7 +146,7 @@ export default function PrivacyPolicyPage() {
         <Section id="sharing" label="05 — Data Sharing">
           <p className="text-gray-400 text-sm mb-3">We do not sell your personal data. We may share data with:</p>
           <ul className="list-disc list-inside space-y-1.5 text-gray-400 text-sm">
-            <li><strong className="text-gray-300">Razorpay</strong> — for payment processing</li>
+            <li><strong className="text-gray-300">CashFree</strong> — for payment processing</li>
             <li><strong className="text-gray-300">Cloud infrastructure providers</strong> (AWS/GCP) — for hosting and storage</li>
             <li><strong className="text-gray-300">Analytics services</strong> — anonymised usage data only</li>
             <li><strong className="text-gray-300">Legal authorities</strong> — when required by court order or applicable law</li>

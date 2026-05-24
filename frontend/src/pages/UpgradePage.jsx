@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Check, ArrowLeft, Zap } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { cn } from '../lib/utils'
@@ -48,8 +50,8 @@ export default function UpgradePage() {
   const tier = user?.tier?.toUpperCase()
 
   const handleCheckout = async () => {
-    if (!window.Razorpay) {
-      setError('Payment SDK not loaded. Please disable ad blockers and refresh.')
+    if (!window.Cashfree) {
+      setError('Payment SDK not loaded. Please refresh the page.')
       return
     }
 
@@ -59,80 +61,76 @@ export default function UpgradePage() {
     try {
       const plan = PLANS.find((p) => p.id === selected)
 
+      // Step 1 — create order on backend
       const orderRes = await api.post('/payment/order', {
         tier: selected,
         amount: plan.price * 100,
       })
 
       // Defensive extraction — handles both { orderId } and raw { id } shapes
-      const orderId = orderRes.data.orderId || orderRes.data.id
-      const keyId = orderRes.data.keyId
+      const { orderId, paymentSessionId } = orderRes.data
 
-      if (!orderId || !keyId) {
-        setError('Invalid response from payment server. Please try again.')
+      if (!paymentSessionId) {
+        setError('Could not initiate payment. Please try again.')
         setLoading(false)
         return
       }
 
-      const options = {
-        key: keyId,
-        amount: plan.price * 100,
-        currency: 'INR',
-        name: 'HookSpy',
-        description: `${plan.label} Plan — Webhook Inspector`,
-        order_id: orderId,
-        handler: async (response) => {
-          try {
-            await api.post('/payment/confirm', {
-              razorpayOrderId: response.razorpay_order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpaySignature: response.razorpay_signature,
-              tier: selected,
-            })
-            // Hard redirect to refresh user session with new tier
-            window.location.href = '/'
-          } catch (confirmErr) {
-            setError(
-              confirmErr.response?.data?.message ||
-              'Payment verified but upgrade failed. Contact support.'
-            )
-            setLoading(false)
-          }
-        },
-        prefill: {
-          email: user?.email,
-        },
-        theme: {
-          color: '#7c6aff',
-        },
-        modal: {
-          // Reset loading state if user closes the modal without paying
-          ondismiss: () => setLoading(false),
-        },
-      }
-
-      const rzp = new window.Razorpay(options)
-
-      // Show payment failure errors on the UI instead of silently failing
-      rzp.on('payment.failed', (response) => {
-        setError(
-          `Payment failed: ${response.error.description} (${response.error.code})`
-        )
-        setLoading(false)
+      // Step 2 — open Cashfree checkout
+      const cashfree = window.Cashfree({
+        mode: import.meta.env.VITE_CASHFREE_ENV === 'PROD'
+            ? 'production' : 'sandbox'
       })
 
-      rzp.open()
+      const checkoutOptions = {
+        paymentSessionId,
+        redirectTarget: '_self', // redirect in same tab
+      }
+
+      cashfree.checkout(checkoutOptions)
+      // Cashfree will redirect to return_url after payment
+      // UpgradePage handles the return via useEffect below
+
     } catch (err) {
       setError(err.response?.data?.message || 'Could not initiate payment')
       setLoading(false)
     }
   }
 
+  const [searchParams] = useSearchParams()
+  const [upgradeStatus, setUpgradeStatus] = useState('')
+  useEffect(() => {
+    const orderId = searchParams.get('order_id')
+    const tier    = searchParams.get('tier')
+
+    if (!orderId || !tier) return
+
+    // Verify payment with backend
+    api.post('/payment/verify', { orderId, tier })
+        .then(() => {
+          setUpgradeStatus('success')
+          setTimeout(() => window.location.href = '/', 2500)
+        })
+        .catch(() => setUpgradeStatus('pending'))
+  }, [])
+
   const currentPlan = PLANS.find((p) => p.id === selected)
 
   return (
     <div className="min-h-screen bg-surface-0 px-4 py-10">
       <div className="max-w-2xl mx-auto">
+
+        {/* Upgrade banner */}
+        {upgradeStatus === 'success' && (
+            <div className="mb-6 px-4 py-3 rounded-lg bg-success/10 border border-success/30 text-success text-sm">
+              ✓ Payment successful — upgrading your account...
+            </div>
+        )}
+        {upgradeStatus === 'pending' && (
+            <div className="mb-6 px-4 py-3 rounded-lg bg-warning/10 border border-warning/30 text-warning text-sm">
+              Payment received — upgrade pending. Contact support@hookspy.in if not upgraded in 5 minutes.
+            </div>
+        )}
 
         {/* Back button */}
         <button

@@ -47,10 +47,12 @@ jwt:
 capture:
   baseurl: https://hookspy.in
 
-razorpay:
-  key:
-    id: ${RAZORPAY_KEY_ID}
-    secret: ${RAZORPAY_KEY_SECRET}
+cashfree:
+  app:
+    id: ${CASHFREE_APP_ID}
+  secret:
+    key: ${CASHFREE_SECRET_KEY}
+  env: ${CASHFREE_ENV:TEST}
 
 management:
   endpoints:

@@ -41,7 +41,7 @@ export default function RegisterPage() {
     setError('')
     setLoading(true)
     try {
-      await register(email, password, tier)
+      await register(email, password)
       navigate('/')
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed')
@@ -139,7 +139,7 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium text-sm rounded-lg py-2.5 transition-colors mt-2"
             >
-              {loading ? 'Creating account…' : `Create ${tier} account`}
+              {loading ? 'Creating account…' : `Create free account — upgrade anytime`}
             </button>
           </form>
         </div>

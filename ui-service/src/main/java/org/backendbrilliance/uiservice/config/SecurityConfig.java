@@ -24,7 +24,10 @@ public class SecurityConfig{
                         .ignoringRequestMatchers("/api/**") // React will handle CSRF separately
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                        .requestMatchers("/api/auth/login",
+                                "/api/auth/register",
+                                "/api/payment/cashfree/webhook"
+                        ).permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().permitAll() // serves React static files

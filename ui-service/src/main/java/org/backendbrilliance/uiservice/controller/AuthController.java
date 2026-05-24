@@ -60,8 +60,8 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@RequestBody RegisterRequest req) {
         log.info("registering user {}", req);
-        var user = userService.register(req.email(), req.password(),
-                Tier.valueOf(req.tier().toUpperCase()));
+        //Register user always with free tier
+        var user = userService.register(req.email(), req.password());
         log.info("user registered: {}", user);
         return ResponseEntity.status(201).body(mapper.userEntityToDTO(user));
     }
